@@ -7,36 +7,58 @@ from wand.image import Image
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash, send_from_directory
 from werkzeug import secure_filename
-from flaskext.uploads import (UploadSet, configure_uploads, IMAGES,
-                              UploadNotAllowed, patch_request_class)
+from flask.ext.sqlalchemy import SQLAlchemy
+from flaskext.bcrypt import Bcrypt
+from flaskext.wtf import Form, TextField, PasswordField, BooleanField, validators, RecaptchaField
 
-UUID4_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
-
-AWS_ACCESS_KEY = "AKIAIOVXMOUEL26POEBQ"
-AWS_SECRET_KEY = "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"
-SEND_FILE_MAX_AGE_DEFAULT = 0
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-
-AWS_POLICY = """
-{"expiration": "2019-01-01T00:00:00Z",
-  "conditions": [ 
-    {"bucket": "allangles"}, 
-    ["starts-with", "$key", "uploads/"],
-    {"acl": "private"},
-    {"success_action_redirect": "http://localhost"},
-    ["starts-with", "$Content-Type", "image/"],
-    ["content-length-range", 0, 1048576]
-  ]
-}
-"""
 DEBUG = True
+UUID4_RE = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+)
 
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'uploads')
-print UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = set(['jpg', 'png', 'gif'])
+SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(os.getcwd(), 'dev.db')
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+class User(db.Model):
+    __tablename__ = 'users'
+    uid = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(60))
+    pwdhash = db.Column(db.String())
+    email = db.Column(db.String(60))
+    activate = db.Column(db.Boolean)
+    created = db.Column(db.DateTime)
+
+    def __init__(self, username, password, email):
+        self.username = username
+        self.pwdhash = bcrypt.generate_password_hash(password)
+        self.email = email
+        self.activate = False
+        self.created = datetime.utcnow()
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.pwdhash, password)
+
+class SignupForm(Form):
+    username = TextField('Username', [validators.Required()])
+    password = PasswordField('Password', [validators.Required(), validators.EqualTo('confirm', message='Passwords must match')])
+    confirm = PasswordField('Confirm Password', [validators.Required()])
+    email = TextField('eMail', [validators.Required()])
+    accept_tos = BooleanField('I accept the TOS', [validators.Required])
+    recaptcha = RecaptchaField()
+
+class LoginForm(Form):
+    username = TextField('Username', [validators.Required()])
+    password = TextField('Password', [validators.Required()])
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -71,6 +93,13 @@ def delete_files(file_id, prefixes=['', 'thumb-']):
 def is_uuid_file(file):
     name = file.split('.')[0]
     return True if UUID4_RE.match(name) else False
+
+@app.route("/signup/", methods=['GET', 'POST'])
+def signup():
+    form = SignupForm()
+    return render_template('signup.html', form=form)
+
+#user = User.query.filter_by(username=form.username)
 
 @app.route("/upload/", methods=['GET', 'POST'])
 def upload():
