@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+<div class="row">
+<div class="span8">
+// Registration form code.
+<form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('signup') }}">
+    <fieldset>
+
+        <legend>Registration</legend>
+
+        <div class="control-group">
+            {{ form.username.label(class="control-label") }}
+            <div class="controls">
+                {{ form.username(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.password.label(class="control-label") }}
+            <div class="controls">
+                {{ form.password(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.confirm.label(class="control-label") }}
+            <div class="controls">
+                {{ form.confirm(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.email.label(class="control-label") }}
+            <div class="controls">
+                {{ form.email(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.accept_tos.label(class="control-label") }}
+            <div class="controls">
+                {{ form.accept_tos(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.recaptcha.label(class="control-label") }}
+            <div class="controls">
+                {{ form.recaptcha(class="input-large")|safe }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success" >Create My Account</button>
+            </div>
+        </div>
+
+    </fieldset>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AllAngl.es</title>
+<meta name="description" content="AllAngl.es helps friends and family consolidate the photos from their special events.  This allows everyone to share the wealth of those captured memories.  Additionally, ordering prints of those photos is only a few clicks away.">
+<meta name="viewport" content="width=device-width">
+<!-- Bootstrap CSS Toolkit styles -->
+<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap.min.css">
+<!-- Generic page styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<!-- Bootstrap styles for responsive website layout, supporting different screen sizes -->
+<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css">
+<!-- Bootstrap CSS fixes for IE6 -->
+<!--[if lt IE 7]><link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css"><![endif]-->
+<!-- Bootstrap Image Gallery styles -->
+<link rel="stylesheet" href="http://blueimp.github.com/Bootstrap-Image-Gallery/css/bootstrap-image-gallery.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/static/css/jquery.fileupload-ui.css">
+<!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
+<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body>
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a class="brand" href="/upload/">AllAngl.es</a>
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li class="active"><a href="#">Demo</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% block body %}{% endblock %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="/static/js/vendor/jquery.ui.widget.js"></script>
+{% block script %}{% endblock %}
+<!-- Bootstrap JS and Bootstrap Image Gallery are not required, but included for the demo -->
+<script src="http://blueimp.github.com/cdn/js/bootstrap.min.js"></script>
+<script src="http://blueimp.github.com/Bootstrap-Image-Gallery/js/bootstrap-image-gallery.min.js"></script>
+</body> 
+</html>
