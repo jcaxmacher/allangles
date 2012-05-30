@@ -18,6 +18,18 @@ from flask.ext.login import (LoginManager, current_user, login_required,
                             confirm_login, fresh_login_required)
 from wtforms.ext.dateutil.fields import DateField
 
+class MethodRewriteMiddleware(object):
+    def __init__(self, app):
+        self.app = app
+    def __call__(self, environ, start_response):
+        if 'METHOD_OVERRIDE' in environ.get('QUERY_STRING', ''):
+            args = url_decode(environ['QUERY_STRING'])
+            method = args.get('__METHOD_OVERRIDE__')
+            if method:
+                method = method.encode('ascii', 'replace')
+                environ['REQUEST_METHOD'] = method
+        return self.app(environ, start_response)
+
 DEBUG = True
 UUID4_RE = re.compile(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
@@ -40,6 +52,7 @@ PERMANENT_SESSION_LIFETIME = timedelta(days=180)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -120,6 +133,7 @@ class LoginForm(Form):
 class EventForm(Form):
     name = TextField('Event name', validators=[Required()])
     date = DateField('Date', validators=[Required()])
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -206,8 +220,10 @@ def events():
 def home():
     return render_template('home.html', user=current_user)
 
-@app.route('/events/<event>')
-def event():
+@app.route('/events/<event>', methods=['DELETE', 'GET'])
+def event(event):
+    if request.method == 'DELETE':
+        pass
     return ''
 
 @app.route('/photos/<event>')
