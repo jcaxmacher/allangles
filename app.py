@@ -17,6 +17,7 @@ from flask.ext.login import (LoginManager, current_user, login_required,
                             login_user, logout_user, UserMixin, AnonymousUser,
                             confirm_login, fresh_login_required)
 from wtforms.ext.dateutil.fields import DateField
+import translitcodec
 
 class MethodRewriteMiddleware(object):
     def __init__(self, app):
@@ -29,6 +30,17 @@ class MethodRewriteMiddleware(object):
                 method = method.encode('ascii', 'replace')
                 environ['REQUEST_METHOD'] = method
         return self.app(environ, start_response)
+
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+def slugify(text, delim=u'-'):
+    """Generates an ASCII-only slug."""
+    result = []
+    for word in _punct_re.split(text.lower()):
+        word = word.encode('translit/long')
+        if word:
+            result.append(word)
+    return unicode(delim.join(result))
 
 DEBUG = True
 UUID4_RE = re.compile(
@@ -99,9 +111,10 @@ class User(db.Model):
 
 class Event(db.Model):
     __tablename__ = 'events'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    slug = db.Column(db.String(100), primary_key=True)
     name = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     date = db.Column(db.DateTime)
 
     def __repr__(self):
@@ -111,6 +124,7 @@ class Event(db.Model):
         self.user_id = user_id
         self.name = name
         self.date = date
+        self.slug = slugify(name)
 
 @login_manager.user_loader
 def load_user(id):
@@ -258,7 +272,7 @@ def upload():
                     'delete_type': 'DELETE',
                     'file_id': file_id
                 })
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.is_xhr:
             return json.dumps(stored)
         else:
             return render_template('upload.html', photos=stored)

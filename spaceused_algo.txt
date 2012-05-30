@@ -1,0 +1,14 @@
+on event: field for last date with upload space used
+
+running update "space used job":
+    get last space-update day
+    total_size = last space recorded
+    for each day between last update and yesterday:
+        get list of files in bucket+user+day folder:
+            for each file in list:
+                get head of file to get size
+                total_size += file size
+    in transaction:
+        update last space-update day
+        update las space recorded
+

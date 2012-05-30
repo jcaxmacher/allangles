@@ -2,13 +2,16 @@ Flask==0.8
 Flask-Bcrypt==0.5.2
 Flask-Login==0.1.2
 Flask-SQLAlchemy==0.16
+Flask-Uploads==0.1.3
 Flask-WTF==0.6
 Jinja2==2.6
 SQLAlchemy==0.7.7
 WTForms==1.0.1
-Wand==0.1.10
+-e git://github.com/dahlia/wand.git@a65fe3a52f74c382d9ab87b5ddf3d77afe9e799e#egg=Wand-dev
 Werkzeug==0.8.3
+boto==2.4.1
 py-bcrypt==0.2
 python-dateutil==2.1
 six==1.1.0
+translitcodec==0.3
 wsgiref==0.1.2
