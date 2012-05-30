@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <h2>{{ user.username|capitalize }}'s Events</h2>
+  <table class="table table-bordered table-striped">
+  <thead>
+      <tr>
+        <th>Event Name</th>
+        <th>Date</th>
+        <th>Photos Uploaded</th>
+        <th colspan="3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in user.events %}
+      <tr>
+        <td>{{ event.name }}</td>
+        <td>{{ event.date }}</td>
+        <td>0</td>
+        <td><a class="btn" href="{{ url_for('photos', event=event.id) }}">View photos</a></td>
+  
+        <td><a class="btn btn-inverse" href="{{ url_for('upload', event=event.id) }}">Add photos</a></td>
+        <td><a class="btn btn-danger" href="{{ url_for('event', event=event.id) }}">Delete event</a></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan=3>None</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a class="btn btn-primary" href="{{ url_for('events') }}">Add an Event</a>
+</div>
+{% endblock %}

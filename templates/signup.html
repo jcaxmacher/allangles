@@ -3,53 +3,84 @@
 <div class="container">
 <div class="row">
 <div class="span8">
-// Registration form code.
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('signup') }}">
     <fieldset>
 
         <legend>Registration</legend>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('username') %}error{% endif %}">
             {{ form.username.label(class="control-label") }}
             <div class="controls">
                 {{ form.username(class="input-large") }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('username', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('password') %}error{% endif %}">
             {{ form.password.label(class="control-label") }}
             <div class="controls">
                 {{ form.password(class="input-large") }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('password', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('confirm') %}error{% endif %}">
             {{ form.confirm.label(class="control-label") }}
             <div class="controls">
                 {{ form.confirm(class="input-large") }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('confirm', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('email') %}error{% endif %}">
             {{ form.email.label(class="control-label") }}
             <div class="controls">
                 {{ form.email(class="input-large") }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('email', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('accept_tos') %}error{% endif %}">
             {{ form.accept_tos.label(class="control-label") }}
             <div class="controls">
                 {{ form.accept_tos(class="input-large") }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('accept_tos', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group {% if form.errors.get('recaptcha') %}error{% endif %}">
             {{ form.recaptcha.label(class="control-label") }}
             <div class="controls">
                 {{ form.recaptcha(class="input-large")|safe }}
+                <span class="help-inline">
+                    {% for error in form.errors.get('recaptcha', []) %}
+                        {{ error }}&nbsp;
+                    {% endfor %}
+                </span>
             </div>
         </div>
+
+        {{ form.hidden_tag() }}
 
         <div class="control-group">
             <label class="control-label"></label>

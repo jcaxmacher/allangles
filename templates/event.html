@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+<div class="row">
+<div class="span8">
+<form class="form-horizontal" id="createEvent" method='post' action="{{ url_for('events') }}">
+    <fieldset>
+
+        <legend>Create an event</legend>
+        {% if form.errors %}
+            <div class="alert alert-error">
+                <button class="close" data-dismiss="alert">x</button>
+                {{ form.errors.values()[0][0] }}
+            </div>
+        {% endif %}
+
+        <div class="control-group">
+            {{ form.name.label(class="control-label") }}
+            <div class="controls">
+                {{ form.name(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.date.label(class="control-label") }}
+            <div class="controls">
+                {{ form.date(class="input-large") }}
+            </div>
+        </div>
+
+        {{ form.hidden_tag() }}
+
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success">Create event</button>
+            </div>
+        </div>
+
+    </fieldset>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}
