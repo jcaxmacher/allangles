@@ -11,7 +11,6 @@ WTForms==1.0.1
 Werkzeug==0.8.3
 argparse==1.2.1
 boto==2.4.1
-gunicorn==0.14.3
 py-bcrypt==0.2
 python-dateutil==2.1
 six==1.1.0
