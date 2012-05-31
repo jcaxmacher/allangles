@@ -42,7 +42,7 @@ def slugify(text, delim=u'-'):
             result.append(word)
     return unicode(delim.join(result))
 
-DEBUG = True
+DEBUG = True if os.environ.get('AA_DEBUG') else False
 UUID4_RE = re.compile(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 )
