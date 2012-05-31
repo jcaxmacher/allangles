@@ -244,39 +244,49 @@ def event(event):
 def photos():
     return ''
 
+def process_uploads(request):
+    stored = []
+    for file in request.files.getlist('file'):
+        if file and allowed_file(file.filename):
+
+            file_id = '%s.%s' % (
+                uuid.uuid4(), file.filename.rsplit('.', 1)[1]
+            )
+            filename = os.path.join(app.config['UPLOAD_FOLDER'], file_id)
+
+            thumb_id = 'thumb-%s' % file_id
+            thumb_filename = os.path.join(
+                app.config['UPLOAD_FOLDER'], thumb_id
+            )
+
+            file.save(filename)
+            make_thumb(filename, thumb_filename)
+            
+            size = os.stat(filename).st_size
+
+            stored.append({'name': 'View a larger version', 'size': size,
+                'url': '/upload/%s' % file_id,
+                'thumbnail_url': '/upload/%s' % thumb_id,
+                'delete_url': '/upload/%s' % file_id,
+                'delete_type': 'DELETE',
+                'file_id': file_id
+            })
+    return stored
+    
 @app.route("/upload/", methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         for file_id in request.form.iterkeys():
             if is_uuid_file(file_id):
                 delete_files(file_id)
-        stored = []
-        print request.form.keys()
-        for file in request.files.getlist('file'):
-            if file and allowed_file(file.filename):
-                file_id = '%s.%s' % (uuid.uuid4(), file.filename.rsplit('.', 1)[1])
-                filename = os.path.join(app.config['UPLOAD_FOLDER'], file_id)
-
-                thumb_id = 'thumb-%s' % file_id
-                thumb_filename = os.path.join(app.config['UPLOAD_FOLDER'], thumb_id)
-
-                file.save(filename)
-                make_thumb(filename, thumb_filename)
-                
-                size = os.stat(filename).st_size
-
-                stored.append({'name': 'View a larger version', 'size': size,
-                    'url': '/upload/%s' % file_id,
-                    'thumbnail_url': '/upload/%s' % thumb_id,
-                    'delete_url': '/upload/%s' % file_id,
-                    'delete_type': 'DELETE',
-                    'file_id': file_id
-                })
-        if request.is_xhr:
-            return json.dumps(stored)
-        else:
-            return render_template('upload.html', photos=stored)
+        stored = process_uploads(request)
+        return render_template('upload.html', photos=stored)
     return render_template('upload.html')
+
+@app.route("/jsupload/", methods=['POST'])
+def jsupload():
+    stored = process_uploads(request)
+    return json.dumps(stored)
 
 @app.route("/upload/<filename>", methods=['GET', 'DELETE'])
 def serve(filename):
