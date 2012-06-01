@@ -139,6 +139,18 @@ class Event(db.Model):
         self.date = date
         self.slug = slugify(name)
 
+class UserActivation(db.Model):
+    __tablename__ = 'activations'
+    uuid = db.Column(db.String(40), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return '<UserActivation %r>' % self.uuid
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.uuid = uuid.uuid4()
+
 @login_manager.user_loader
 def load_user(id):
     return User.query.filter_by(id=id).first()
