@@ -8,12 +8,13 @@
 
         <legend>Registration</legend>
 
-        <div class="control-group {% if form.errors.get('username') %}error{% endif %}">
-            {{ form.username.label(class="control-label") }}
+
+        <div class="control-group {% if form.errors.get('email') %}error{% endif %}">
+            {{ form.email.label(class="control-label") }}
             <div class="controls">
-                {{ form.username(class="input-large") }}
+                {{ form.email(class="input-large") }}
                 <span class="help-inline">
-                    {% for error in form.errors.get('username', []) %}
+                    {% for error in form.errors.get('email', []) %}
                         {{ error }}&nbsp;
                     {% endfor %}
                 </span>
@@ -26,30 +27,6 @@
                 {{ form.password(class="input-large") }}
                 <span class="help-inline">
                     {% for error in form.errors.get('password', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
-        <div class="control-group {% if form.errors.get('confirm') %}error{% endif %}">
-            {{ form.confirm.label(class="control-label") }}
-            <div class="controls">
-                {{ form.confirm(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('confirm', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
-        <div class="control-group {% if form.errors.get('email') %}error{% endif %}">
-            {{ form.email.label(class="control-label") }}
-            <div class="controls">
-                {{ form.email(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('email', []) %}
                         {{ error }}&nbsp;
                     {% endfor %}
                 </span>

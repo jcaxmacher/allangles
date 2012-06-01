@@ -16,6 +16,7 @@ from flaskext.wtf import Form, TextField, PasswordField, BooleanField, \
 from flask.ext.login import (LoginManager, current_user, login_required,
                             login_user, logout_user, UserMixin, AnonymousUser,
                             confirm_login, fresh_login_required)
+from flask.ext.oauth import OAuth
 from wtforms.ext.dateutil.fields import DateField
 import translitcodec
 
@@ -42,7 +43,7 @@ def slugify(text, delim=u'-'):
             result.append(word)
     return unicode(delim.join(result))
 
-DEBUG = True if os.environ.get('AA_DEBUG') else False
+DEBUG = True if os.environ.get('DEBUG') else False
 UUID4_RE = re.compile(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 )
@@ -66,6 +67,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 
+oauth = OAuth()
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
@@ -73,20 +75,28 @@ login_manager.anonymous_user = AnonymousUser
 login_manager.login_view = 'login'
 login_manager.login_message = u'Please log in to access this page'
 
+facebook = oauth.remote_app('facebook',
+    base_url='https://graph.facebook.com/',
+    request_token_url=None,
+    access_token_url='/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    consumer_key=os.environ.get('FB_API_KEY'),
+    consumer_secret=os.environ.get('FB_SECRET'),
+    request_token_params={'scope': 'email'}
+)
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(60))
     pwdhash = db.Column(db.String())
-    email = db.Column(db.String(60))
+    email = db.Column(db.String(60), unique=True)
     activate = db.Column(db.Boolean)
     created = db.Column(db.DateTime)
+    fb_id = db.Column(db.String(30), unique=True)
     events = db.relationship('Event', backref='user', lazy='dynamic')
 
-    def __init__(self, username, password, email):
-        self.username = username
-        self.pwdhash = bcrypt.generate_password_hash(password)
-        self.email = email
+    def __init__(self):
         self.activate = False
         self.created = datetime.utcnow()
 
@@ -95,6 +105,9 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.pwdhash, password)
+
+    def set_password(self, password):
+        self.pwdhash = bcrypt.generate_password_hash(password)
 
     def get_id(self):
         return unicode(self.id)
@@ -133,10 +146,8 @@ def load_user(id):
 login_manager.setup_app(app)
 
 class SignupForm(Form):
-    username = TextField('Username', validators=[Required()])
-    password = PasswordField('Password', validators=[Required(), EqualTo('confirm', message='Passwords must match')])
-    confirm = PasswordField('Confirm Password', validators=[Required()])
     email = TextField('Email', validators=[Required()])
+    password = PasswordField('Password', validators=[Required()])
     accept_tos = BooleanField('I accept the Terms of Service', validators=[Required()])
     recaptcha = RecaptchaField()
 
@@ -187,6 +198,7 @@ def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated():
+            flash('You are already logged in.')
             return redirect(url_for('home'))
         else:
             return f(*args, **kwargs)
@@ -204,15 +216,34 @@ def login():
             return redirect(request.args.get('next') or url_for('home'))
     return render_template('login.html', form=form)
 
-@app.route("/signup/", methods=['GET', 'POST'])
+@app.route('/fblogin/')
+@not_logged_in
+def fblogin():
+    return facebook.authorize(callback=url_for('facebook_authorized',
+        next=request.args.get('next') or request.referrer or None,
+        _external=True))
+
+@app.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/')
+def index():
+    return 'home page'
+
+@app.route('/signup/', methods=['GET', 'POST'])
 @not_logged_in
 def signup():
     form = SignupForm()
     if form.validate_on_submit():
-        user = User(form.username.data, form.password.data, form.email.data)
+        user = User()
+        user.email = form.email.data
+        user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        login_user(user)
+        login_user(user, remember=True)
         flash('Your account was created successfully!')
         return redirect(url_for('home'))
     return render_template('signup.html', form=form)
@@ -229,7 +260,7 @@ def events():
         return redirect(url_for('home'))
     return render_template('event.html', form=form)
 
-@app.route("/home/")
+@app.route('/home/')
 @login_required
 def home():
     return render_template('home.html', user=current_user)
@@ -273,7 +304,7 @@ def process_uploads(request):
             })
     return stored
     
-@app.route("/upload/", methods=['GET', 'POST'])
+@app.route('/upload/', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         for file_id in request.form.iterkeys():
@@ -283,18 +314,49 @@ def upload():
         return render_template('upload.html', photos=stored)
     return render_template('upload.html')
 
-@app.route("/jsupload/", methods=['POST'])
+@app.route('/jsupload/', methods=['POST'])
 def jsupload():
     stored = process_uploads(request)
     return json.dumps(stored)
 
-@app.route("/upload/<filename>", methods=['GET', 'DELETE'])
+@app.route('/upload/<filename>', methods=['GET', 'DELETE'])
 def serve(filename):
     if request.method == 'DELETE':
         result = delete_files(filename)
         return '', result
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
+@app.route('/fblogin/authorized')
+@facebook.authorized_handler
+def facebook_authorized(resp):
+    next_url = request.args.get('next') or url_for('home')
+    if resp is None:
+        flash('You denied the login')
+        return redirect(next_url)
+
+    session['fb_access_token'] = (resp['access_token'], '')
+
+    me = facebook.get('/me')
+    user = User.query.filter_by(email=me.data['email']).first()
+    if user is None:
+        user = User()
+        user.fb_id = me.data['id']
+        user.email = me.data['email']
+        db.session.add(user)
+    elif user.fb_id is None:
+        user.fb_id = me.data['id']
+        db.session.add(user)
+
+    db.session.commit()
+    login_user(user, remember=True)
+
+    flash('You are now logged in as %s' % user.email)
+    return redirect(next_url)
+
+@facebook.tokengetter
+def get_facebook_oauth_token():
+    return session.get('fb_access_token')
 
 if __name__ == '__main__':
     app.run()
