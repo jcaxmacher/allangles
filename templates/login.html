@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
+
 <div class="container">
 <div class="row">
-<div class="span8">
+<div class="span5">
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('login') }}">
     <fieldset>
 
@@ -15,27 +16,30 @@
         {% endif %}
 
         <div class="control-group">
-            {{ form.username.label(class="control-label") }}
+            {{ form.email.label(class="control-label") }}
             <div class="controls">
-                {{ form.username(class="input-large") }}
+                {{ form.email(class="input-large") }}
             </div>
         </div>
 
         <div class="control-group">
             {{ form.password.label(class="control-label") }}
             <div class="controls">
-                {{ form.password(class="input-large") }}
-            </div>
-        </div>
-
+                {{ form.password(class="input-large") }} </div>
+        </div> 
         {{ form.hidden_tag() }}
 
-        <div class="control-group">
-            <label class="control-label"></label>
-            <div class="controls">
+        <div class="form-actions">
                 <button type="submit" class="btn btn-success">Log In</button>
-                <span>or <a href="{{ url_for('signup') }}">sign up</a>.</span>
-            </div>
+
+                <a href="{{ url_for('fblogin') }}" class="btn btn-primary">or Log In with Facebook</a>
+                
+        </div>
+        <div class="control-group">
+            <div class="controls">
+        <span class="span2">Don't have an account with us or Facebook?</span>
+                <a class="btn btn-inverse" href="{{ url_for('signup') }}">Sign up</a>
+        </div>
         </div>
 
     </fieldset>

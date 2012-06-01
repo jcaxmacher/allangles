@@ -2,7 +2,7 @@
 {% block body %}
 <div class="container">
 <div class="row">
-<div class="span8">
+<div class="span6">
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('signup') }}">
     <fieldset>
 
@@ -59,11 +59,11 @@
 
         {{ form.hidden_tag() }}
 
-        <div class="control-group">
-            <label class="control-label"></label>
-            <div class="controls">
+        <div class="form-actions">
                 <button type="submit" class="btn btn-success" >Create My Account</button>
-            </div>
+
+                <a href="{{ url_for('fblogin') }}" class="btn btn-primary">or Log In with Facebook</a>
+                
         </div>
 
     </fieldset>

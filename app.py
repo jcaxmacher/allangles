@@ -152,7 +152,7 @@ class SignupForm(Form):
     recaptcha = RecaptchaField()
 
 class LoginForm(Form):
-    username = TextField('Username')
+    email = TextField('Email')
     password = PasswordField('Password')
 
 class EventForm(Form):
@@ -209,9 +209,9 @@ def not_logged_in(f):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if not user or not user.check_password(form.password.data):
-            form.errors['username'] = [u'Incorrect username or password.']
+            form.errors['email'] = [u'Incorrect email or password.']
         elif login_user(user, remember=True):
             return redirect(request.args.get('next') or url_for('home'))
     return render_template('login.html', form=form)
@@ -231,6 +231,7 @@ def logout():
 
 @app.route('/')
 def index():
+    print url_for('facebook_authorized')
     return 'home page'
 
 @app.route('/signup/', methods=['GET', 'POST'])
