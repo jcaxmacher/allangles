@@ -115,8 +115,7 @@ class User(db.Model):
         return unicode(self.id)
 
     def is_active(self):
-        # TODO: Remove True once activation is configured
-        return True or self.activate
+        return self.activate
 
     def is_anonymous(self):
         return False
@@ -216,7 +215,7 @@ def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated():
-            flash('You are already logged in.')
+            flash('You are already logged in.', 'alert-success')
             return redirect(url_for('home'))
         else:
             return f(*args, **kwargs)
@@ -230,7 +229,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if not user or not user.check_password(form.password.data):
             form.errors['email'] = [u'Incorrect email or password.']
-        elif login_user(user, remember=True):
+        elif login_user(user, remember=True, force=True):
             return redirect(request.args.get('next') or url_for('home'))
     return render_template('login.html', form=form)
 
@@ -266,26 +265,35 @@ def signup():
         db.session.add(user_activation)
         db.session.commit()
         login_user(user, remember=True)
-        flash('Your account was created successfully!')
+        flash('Your account was created successfully!', 'alert-success')
         return redirect(url_for('home'))
     return render_template('signup.html', form=form)
 
 @app.route('/activate/<uuid>')
 def activate(uuid):
-    UserActivation.query.filter_by(uuid=ua.uuid).first().user.activations.all()
-    pass
+    activation = UserActivation.query.filter_by(uuid=uuid).first_or_404()
+    user = activation.user
+    user.activate = True
+    db.session.add(user)
+    db.session.query(UserActivation).filter(UserActivation.user_id==user.id).delete()
+    db.session.commit()
+    flash('Your account was successfully activated!', 'alert-success')
+    return redirect(url_for('home'))
 
 @app.route('/events/', methods=['GET', 'POST'])
 @login_required
 def events():
     form = EventForm()
-    if form.validate_on_submit():
+    if not current_user.activate:
+        flash('Please confirm your email address before creating an event.', 'alert-error')
+        return redirect(url_for('home'))
+    elif form.validate_on_submit():
         event = Event(current_user.id, form.name.data, form.date.data)
         db.session.add(event)
         db.session.commit()
-        flash('Your event was created successfully!')
+        flash('Your event was created successfully!', 'alert-success')
         return redirect(url_for('home'))
-    return render_template('event.html', form=form)
+    return render_template('event.html', form=form, user=current_user)
 
 @app.route('/home/')
 @login_required
@@ -379,7 +387,7 @@ def facebook_authorized(resp):
     db.session.commit()
     login_user(user, remember=True)
 
-    flash('You are now logged in as %s' % user.email)
+    flash('You are now logged in as %s' % user.email, 'alert-success')
     return redirect(next_url)
 
 @facebook.tokengetter
