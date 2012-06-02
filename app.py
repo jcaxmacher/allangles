@@ -95,6 +95,8 @@ class User(db.Model):
     created = db.Column(db.DateTime)
     fb_id = db.Column(db.String(30), unique=True)
     events = db.relationship('Event', backref='user', lazy='dynamic')
+    activations = db.relationship('UserActivation', backref='user',
+        lazy='dynamic')
 
     def __init__(self):
         self.activate = False
@@ -143,13 +145,17 @@ class UserActivation(db.Model):
     __tablename__ = 'activations'
     uuid = db.Column(db.String(40), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    email_sent = db.Column(db.Boolean)
+    created = db.Column(db.DateTime)
 
     def __repr__(self):
         return '<UserActivation %r>' % self.uuid
 
     def __init__(self, user_id):
         self.user_id = user_id
-        self.uuid = uuid.uuid4()
+        self.uuid = str(uuid.uuid4())
+        self.email_sent = False
+        self.created = datetime.utcnow() 
 
 @login_manager.user_loader
 def load_user(id):
@@ -256,10 +262,18 @@ def signup():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+        user_activation = UserActivation(user_id = user.id)
+        db.session.add(user_activation)
+        db.session.commit()
         login_user(user, remember=True)
         flash('Your account was created successfully!')
         return redirect(url_for('home'))
     return render_template('signup.html', form=form)
+
+@app.route('/activate/<uuid>')
+def activate(uuid):
+    UserActivation.query.filter_by(uuid=ua.uuid).first().user.activations.all()
+    pass
 
 @app.route('/events/', methods=['GET', 'POST'])
 @login_required
@@ -356,6 +370,7 @@ def facebook_authorized(resp):
         user = User()
         user.fb_id = me.data['id']
         user.email = me.data['email']
+        user.activate = True
         db.session.add(user)
     elif user.fb_id is None:
         user.fb_id = me.data['id']
