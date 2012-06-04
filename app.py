@@ -126,10 +126,9 @@ class User(db.Model):
 
 class Event(db.Model):
     __tablename__ = 'events'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     slug = db.Column(db.String(100), primary_key=True)
     name = db.Column(db.String(100))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     date = db.Column(db.DateTime)
 
     def __repr__(self):
@@ -217,7 +216,6 @@ def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated():
-            flash('You are already logged in.', 'alert-success')
             return redirect(url_for('home'))
         else:
             return f(*args, **kwargs)
@@ -251,7 +249,7 @@ def logout():
 @app.route('/')
 def index():
     print url_for('facebook_authorized')
-    return 'home page'
+    return redirect(url_for('signup'))
 
 @app.route('/signup/', methods=['GET', 'POST'])
 @not_logged_in
@@ -381,6 +379,7 @@ def facebook_authorized(resp):
         user = User()
         user.fb_id = me.data['id']
         user.email = me.data['email']
+        user.name = me.data['name']
         user.activate = True
         db.session.add(user)
     elif user.fb_id is None:

@@ -3,6 +3,16 @@
 
 <div class="container">
 <div class="row">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+         <div class="alert {{ category }}">
+             <button type="button" class="close" data-dismiss="alert">×</button>
+             {{ message }}
+         </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 <div class="span5">
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('login') }}">
     <fieldset>
