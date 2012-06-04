@@ -29,7 +29,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="{{ url_for('home') }}">AllAngl.es</a>
+            <a class="brand" href="{{ url_for('profile') }}">AllAngl.es</a>
             <div class="btn-group pull-right">
                 {% if user %}
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -37,7 +37,7 @@
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a href="#">Profile</a></li>
+                  <li><a href="{{ url_for('profile') }}">Profile</a></li>
                   <li class="divider"></li>
                   <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
                 </ul>

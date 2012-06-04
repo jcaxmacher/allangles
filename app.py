@@ -216,7 +216,7 @@ def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated():
-            return redirect(url_for('home'))
+            return redirect(url_for('profile'))
         else:
             return f(*args, **kwargs)
     return wrapper
@@ -230,7 +230,7 @@ def login():
         if not user or not user.check_password(form.password.data):
             form.errors['email'] = [u'Incorrect email or password.']
         elif login_user(user, remember=True, force=True):
-            return redirect(request.args.get('next') or url_for('home'))
+            return redirect(request.args.get('next') or url_for('profile'))
     return render_template('login.html', form=form)
 
 @app.route('/fblogin/')
@@ -267,7 +267,7 @@ def signup():
         db.session.add(user_activation)
         db.session.commit()
         flash('Your account was created successfully!', 'alert-success')
-        return redirect(url_for('home'))
+        return redirect(url_for('profile'))
     return render_template('signup.html', form=form)
 
 @app.route('/activate/<uuid>')
@@ -279,33 +279,32 @@ def activate(uuid):
     db.session.query(UserActivation).filter(UserActivation.user_id==user.id).delete()
     db.session.commit()
     flash('Your account was successfully activated!', 'alert-success')
-    return redirect(url_for('home'))
+    return redirect(url_for('profile'))
 
-@app.route('/events/', methods=['GET', 'POST'])
+@app.route('/event/', methods=['GET', 'POST'])
 @login_required
-def events():
+def event():
     form = EventForm()
     if not current_user.activate:
         flash('Please confirm your email address before creating an event.', 'alert-error')
-        return redirect(url_for('home'))
+        return redirect(url_for('profile'))
     elif form.validate_on_submit():
         event = Event(current_user.id, form.name.data, form.date.data)
         db.session.add(event)
         db.session.commit()
         flash('Your event was created successfully!', 'alert-success')
-        return redirect(url_for('home'))
+        return redirect(url_for('profile'))
     return render_template('event.html', form=form, user=current_user)
+
+@app.route('/events/')
+@login_required
+def events():
+    return render_template('events.html', user=current_user)
 
 @app.route('/home/')
 @login_required
 def home():
     return render_template('home.html', user=current_user)
-
-@app.route('/events/<event>', methods=['DELETE', 'GET'])
-def event(event):
-    if request.method == 'DELETE':
-        pass
-    return ''
 
 @app.route('/photos/<event>')
 def photos():
@@ -363,10 +362,15 @@ def serve(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
+@app.route('/profile/')
+@login_required
+def profile():
+    return render_template('profile.html', user=current_user)
+
 @app.route('/fblogin/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
-    next_url = request.args.get('next') or url_for('home')
+    next_url = request.args.get('next') or url_for('profile')
     if resp is None:
         flash('You denied the login')
         return redirect(next_url)
