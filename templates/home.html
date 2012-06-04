@@ -11,7 +11,15 @@
       {% endfor %}
     {% endif %}
   {% endwith %}
+  {% if user.username %}
   <h2>{{ user.username|capitalize }}'s Events</h2>
+  {% elif user.name %}
+  <h2>{{ user.name|capitalize }}'s Events</h2>
+  {% elif user.email %}
+  <h2>{{ user.email|capitalize }}'s Events</h2>
+  {% else %}
+  <h2>Your Events</h2>
+  {% endif %}
   <table class="table table-bordered table-striped">
   <thead>
       <tr>

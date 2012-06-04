@@ -88,6 +88,7 @@ facebook = oauth.remote_app('facebook',
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60))
     username = db.Column(db.String(60))
     pwdhash = db.Column(db.String())
     email = db.Column(db.String(60), unique=True)
@@ -163,6 +164,7 @@ def load_user(id):
 login_manager.setup_app(app)
 
 class SignupForm(Form):
+    name = TextField('Your name')
     email = TextField('Email', validators=[Required()])
     password = PasswordField('Password', validators=[Required()])
     accept_tos = BooleanField('I accept the Terms of Service', validators=[Required()])
@@ -258,13 +260,14 @@ def signup():
     if form.validate_on_submit():
         user = User()
         user.email = form.email.data
+        user.name = form.name.data
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+        login_user(user, remember=True)
         user_activation = UserActivation(user_id = user.id)
         db.session.add(user_activation)
         db.session.commit()
-        login_user(user, remember=True)
         flash('Your account was created successfully!', 'alert-success')
         return redirect(url_for('home'))
     return render_template('signup.html', form=form)
