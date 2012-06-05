@@ -11,5 +11,3 @@ running update "space used job":
     in transaction:
         update last space-update day
         update las space recorded
-
-
