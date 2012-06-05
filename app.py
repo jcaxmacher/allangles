@@ -164,6 +164,24 @@ class UserActivation(db.Model):
         self.email_sent = False
         self.created = datetime.utcnow() 
 
+class Photo(db.Model):
+    __tablename__ = 'photos'
+    uuid = db.Column(db.String(40), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    event_slug = db.Column(db.String(40), db.ForeignKey('event.slug'))
+    created = db.Column(db.DateTime)
+    cloud_hosted = db.Column(db.Boolean)
+
+    def __repr__(self):
+        return '<Photo %r>' % self.uuid
+
+    def __init__(self, user_id, event_slug, uuid):
+        self.user_id = user_id
+        self.event_slug = event_slug
+        self.uuid = uuid
+        self.cloud_hosted = False
+        self.created = datetime.utcnow() 
+
 @login_manager.user_loader
 def load_user(id):
     return User.query.filter_by(id=id).first()
@@ -323,13 +341,14 @@ def home():
 def photos():
     return ''
 
-def process_uploads(request):
+def process_uploads(request, user=None, event=None):
     stored = []
     for file in request.files.getlist('file'):
         if file and allowed_file(file.filename):
 
+            uuid = uuid.uuid4()
             file_id = '%s.%s' % (
-                uuid.uuid4(), file.filename.rsplit('.', 1)[1]
+                uuid, file.filename.rsplit('.', 1)[1]
             )
             filename = os.path.join(app.config['UPLOAD_FOLDER'], file_id)
 
@@ -350,6 +369,10 @@ def process_uploads(request):
                 'delete_type': 'DELETE',
                 'file_id': file_id
             })
+
+            photo = Photo(user.id, event.slug, uuid)
+            db.session.add(photo)
+    db.session.commit()
     return stored
     
 @app.route('/<user_slug>/<event_slug>', methods=['GET', 'POST'])
@@ -360,12 +383,13 @@ def upload(user_slug, event_slug):
         for file_id in request.form.iterkeys():
             if is_uuid_file(file_id):
                 delete_files(file_id)
-        stored = process_uploads(request)
+        stored = process_uploads(request, user=user, event=event)
         return render_template('upload.html', photos=stored, event=event, user=user)
     return render_template('upload.html', event=event, user=user)
 
 @app.route('/jsupload/', methods=['POST'])
 def jsupload():
+# TODO : update javascript to send user and event on upload http post
     stored = process_uploads(request)
     return json.dumps(stored)
 
