@@ -89,7 +89,8 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60))
-    username = db.Column(db.String(60))
+    username = db.Column(db.String(60), unique=True)
+    userslug = db.Column(db.String(60), unique=True)
     pwdhash = db.Column(db.String())
     email = db.Column(db.String(60), unique=True)
     activate = db.Column(db.Boolean)
@@ -142,8 +143,8 @@ class Event(db.Model):
 
 class UserActivation(db.Model):
     __tablename__ = 'activations'
-    uuid = db.Column(db.String(40), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    uuid = db.Column(db.String(40))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     email_sent = db.Column(db.Boolean)
     created = db.Column(db.DateTime)
 
@@ -163,7 +164,7 @@ def load_user(id):
 login_manager.setup_app(app)
 
 class SignupForm(Form):
-    name = TextField('Your name')
+    name = TextField('Your full name')
     email = TextField('Email', validators=[Required()])
     password = PasswordField('Password', validators=[Required()])
     accept_tos = BooleanField('I accept the Terms of Service', validators=[Required()])
@@ -177,6 +178,8 @@ class EventForm(Form):
     name = TextField('Event name', validators=[Required()])
     date = DateField('Date', validators=[Required()])
 
+class InitialProfileForm(Form):
+    username = TextField('Choose a username', validators=[Required()])
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -267,7 +270,7 @@ def signup():
         db.session.add(user_activation)
         db.session.commit()
         flash('Your account was created successfully!', 'alert-success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('unconfirmed'))
     return render_template('signup.html', form=form)
 
 @app.route('/activate/<uuid>')
@@ -276,7 +279,7 @@ def activate(uuid):
     user = activation.user
     user.activate = True
     db.session.add(user)
-    db.session.query(UserActivation).filter(UserActivation.user_id==user.id).delete()
+    db.session.delete(activation)
     db.session.commit()
     flash('Your account was successfully activated!', 'alert-success')
     return redirect(url_for('profile'))
@@ -287,13 +290,13 @@ def event():
     form = EventForm()
     if not current_user.activate:
         flash('Please confirm your email address before creating an event.', 'alert-error')
-        return redirect(url_for('profile'))
+        return redirect(url_for('unconfirmed'))
     elif form.validate_on_submit():
         event = Event(current_user.id, form.name.data, form.date.data)
         db.session.add(event)
         db.session.commit()
         flash('Your event was created successfully!', 'alert-success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('events'))
     return render_template('event.html', form=form, user=current_user)
 
 @app.route('/events/')
@@ -362,10 +365,35 @@ def serve(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
-@app.route('/profile/')
+@app.route('/profile/', methods=['POST', 'GET'])
 @login_required
 def profile():
-    return render_template('profile.html', user=current_user)
+    form = InitialProfileForm()
+    if not current_user.activate:
+        flash('Please confirm your email address before attempting to add a username', 'alert-error')
+        return redirect(url_for('unconfirmed'))
+    elif form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.userslug = slugify(current_user.username)
+        db.session.add(current_user)
+        db.session.commit()
+        flash('Your username was added successfully.', 'alert-success')
+        return redirect(url_for('profile'))
+    return render_template('profile.html', form=form, user=current_user)
+
+@app.route('/unconfirmed/')
+@login_required
+def unconfirmed():
+    return render_template('unconfirmed.html', user=current_user)
+
+@app.route('/resend/')
+@login_required
+def resend():
+    activation = UserActivation.query.filter_by(user_id=current_user.id).first_or_404()
+    activation.email_sent = False
+    db.session.add(activation)
+    db.session.commit()
+    return redirect(url_for('unconfirmed'))
 
 @app.route('/fblogin/authorized')
 @facebook.authorized_handler
