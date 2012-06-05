@@ -3,6 +3,7 @@ import os
 import json
 import uuid
 import stat
+import boto
 from datetime import timedelta, datetime
 from functools import wraps
 from wand.image import Image
@@ -83,6 +84,11 @@ facebook = oauth.remote_app('facebook',
     consumer_key=os.environ.get('FB_API_KEY'),
     consumer_secret=os.environ.get('FB_SECRET'),
     request_token_params={'scope': 'email'}
+)
+
+ses = boto.connect_ses(
+    aws_access_key_id=os.environ.get('AWS_KEY'),
+    aws_secret_access_key=os.environ.get('AWS_SECRET')
 )
 
 class User(db.Model):
@@ -270,6 +276,9 @@ def signup():
         db.session.add(user_activation)
         db.session.commit()
         flash('Your account was created successfully!', 'alert-success')
+        ses.send_email(AA_EMAIL, 'Activate your AllAngl.es account',
+            'http://allangl.es/activate/%s' % user_activation.uuid,
+            [user.email])
         return redirect(url_for('unconfirmed'))
     return render_template('signup.html', form=form)
 
