@@ -46,7 +46,7 @@
         <td>{{ event.date }}</td>
         <td>0</td>
   
-        <td><a class="btn" href="{{ url_for('upload', event=event.id) }}">
+        <td><a class="btn" href="{{ url_for('upload', event_slug=event.slug, user_slug=user.userslug) }}">
         <i class="icon-plus"></i> Add photos</a></td>
         <td><a class="btn btn-danger" href="{{ url_for('event', event=event.id) }}">
         <i class="icon-remove"></i> Delete event</a></td>

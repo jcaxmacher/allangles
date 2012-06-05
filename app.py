@@ -352,15 +352,17 @@ def process_uploads(request):
             })
     return stored
     
-@app.route('/upload/', methods=['GET', 'POST'])
-def upload():
+@app.route('/<user_slug>/<event_slug>', methods=['GET', 'POST'])
+def upload(user_slug, event_slug):
+    user = User.query.filter_by(userslug=user_slug).first_or_404()
+    event = Event.query.filter_by(slug=event_slug, user_id=user.id).first_or_404()
     if request.method == 'POST':
         for file_id in request.form.iterkeys():
             if is_uuid_file(file_id):
                 delete_files(file_id)
         stored = process_uploads(request)
-        return render_template('upload.html', photos=stored)
-    return render_template('upload.html')
+        return render_template('upload.html', photos=stored, event=event, user=user)
+    return render_template('upload.html', event=event, user=user)
 
 @app.route('/jsupload/', methods=['POST'])
 def jsupload():
