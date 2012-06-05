@@ -48,6 +48,7 @@ DEBUG = True if os.environ.get('DEBUG') else False
 UUID4_RE = re.compile(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 )
+EMAIL = os.environ.get('OUTGOING_EMAIL', 'robot@allangl.es')
 
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'uploads')
@@ -276,7 +277,7 @@ def signup():
         db.session.add(user_activation)
         db.session.commit()
         flash('Your account was created successfully!', 'alert-success')
-        ses.send_email(AA_EMAIL, 'Activate your AllAngl.es account',
+        ses.send_email(EMAIL, 'Activate your AllAngl.es account',
             'http://allangl.es/activate/%s' % user_activation.uuid,
             [user.email])
         return redirect(url_for('unconfirmed'))
