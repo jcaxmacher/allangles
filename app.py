@@ -4,6 +4,7 @@ import json
 import uuid
 import stat
 import boto
+from urlparse import urlparse
 from datetime import timedelta, datetime
 from functools import wraps
 from wand.image import Image
@@ -168,7 +169,7 @@ class Photo(db.Model):
     __tablename__ = 'photos'
     uuid = db.Column(db.String(40), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event_slug = db.Column(db.String(40), db.ForeignKey('event.slug'))
+    event_slug = db.Column(db.String(40), db.ForeignKey('events.slug'))
     created = db.Column(db.DateTime)
     cloud_hosted = db.Column(db.Boolean)
 
@@ -178,7 +179,7 @@ class Photo(db.Model):
     def __init__(self, user_id, event_slug, uuid):
         self.user_id = user_id
         self.event_slug = event_slug
-        self.uuid = uuid
+        self.uuid = str(uuid)
         self.cloud_hosted = False
         self.created = datetime.utcnow() 
 
@@ -346,9 +347,9 @@ def process_uploads(request, user=None, event=None):
     for file in request.files.getlist('file'):
         if file and allowed_file(file.filename):
 
-            uuid = uuid.uuid4()
+            file_uuid = uuid.uuid4()
             file_id = '%s.%s' % (
-                uuid, file.filename.rsplit('.', 1)[1]
+                file_uuid, file.filename.rsplit('.', 1)[1]
             )
             filename = os.path.join(app.config['UPLOAD_FOLDER'], file_id)
 
@@ -370,7 +371,7 @@ def process_uploads(request, user=None, event=None):
                 'file_id': file_id
             })
 
-            photo = Photo(user.id, event.slug, uuid)
+            photo = Photo(user.id, event.slug, file_uuid)
             db.session.add(photo)
     db.session.commit()
     return stored
@@ -389,8 +390,15 @@ def upload(user_slug, event_slug):
 
 @app.route('/jsupload/', methods=['POST'])
 def jsupload():
-# TODO : update javascript to send user and event on upload http post
-    stored = process_uploads(request)
+    # TODO : update javascript to send user and event on upload http post
+    url_path = urlparse(request.referrer).path
+    path_parts = url_path.split('/')
+    if len(path_parts) != 3:
+        abort(403)
+    _, user_slug, event_slug = path_parts
+    user = User.query.filter_by(userslug=user_slug).first_or_404()
+    event = Event.query.filter_by(slug=event_slug, user_id=user.id).first_or_404()
+    stored = process_uploads(request, user=user, event=event)
     return json.dumps(stored)
 
 @app.route('/upload/<filename>', methods=['GET', 'DELETE'])
