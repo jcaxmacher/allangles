@@ -42,7 +42,7 @@
     <tbody>
       {% for event in user.events %}
       <tr>
-        <td><a href="{{ url_for('photos', event=event.id) }}">{{ event.name }}</a></td>
+        <td><a href="{{ url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug) }}">{{ event.name }}</a></td>
         <td>{{ event.date }}</td>
         <td>0</td>
   
