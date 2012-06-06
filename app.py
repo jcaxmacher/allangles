@@ -51,6 +51,7 @@ UUID4_RE = re.compile(
 )
 EMAIL = os.environ.get('OUTGOING_EMAIL', 'robot@allangl.es')
 
+UPLOAD_PREFIX = '/upload'
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'uploads')
 ALLOWED_EXTENSIONS = set(['jpg', 'png', 'gif'])
@@ -139,9 +140,10 @@ class Event(db.Model):
     name = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     date = db.Column(db.DateTime)
+    photos = db.relationship('Photo', backref='event', lazy='dynamic')
 
     def __repr__(self):
-        return '<Event %r>' % self.username
+        return '<Event %r>' % self.name
 
     def __init__(self, user_id, name, date):
         self.user_id = user_id
@@ -168,20 +170,37 @@ class UserActivation(db.Model):
 class Photo(db.Model):
     __tablename__ = 'photos'
     uuid = db.Column(db.String(40), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event_slug = db.Column(db.String(40), db.ForeignKey('events.slug'))
+    user_id = db.Column(db.Integer)
+    #, db.ForeignKey('users.id'))
+    event_slug = db.Column(db.String(40))
+    #, db.ForeignKey('events.slug'))
     created = db.Column(db.DateTime)
     cloud_hosted = db.Column(db.Boolean)
+    original = db.Column(db.String(60))
+    thumb = db.Column(db.String(60))
+    __table_args__ = (db.ForeignKeyConstraint([user_id, event_slug],
+                                              [Event.user_id, Event.slug]),
+                      {})
+
+    def get_thumb_url(self):
+        return u'%s/%s' % (UPLOAD_PREFIX, self.thumb)
+    thumb_url = property(get_thumb_url)
+
+    def get_url(self):
+        return u'%s/%s' % (UPLOAD_PREFIX, self.original)
+    url = property(get_url)
 
     def __repr__(self):
         return '<Photo %r>' % self.uuid
 
-    def __init__(self, user_id, event_slug, uuid):
+    def __init__(self, user_id, event_slug, uuid, original, thumb):
         self.user_id = user_id
         self.event_slug = event_slug
         self.uuid = str(uuid)
         self.cloud_hosted = False
         self.created = datetime.utcnow() 
+        self.original = original
+        self.thumb = thumb
 
 @login_manager.user_loader
 def load_user(id):
@@ -342,7 +361,7 @@ def home():
 def photos():
     return ''
 
-def process_uploads(request, user=None, event=None):
+def process_uploads(request, event=None):
     stored = []
     for file in request.files.getlist('file'):
         if file and allowed_file(file.filename):
@@ -371,34 +390,43 @@ def process_uploads(request, user=None, event=None):
                 'file_id': file_id
             })
 
-            photo = Photo(user.id, event.slug, file_uuid)
+            photo = Photo(event.user_id, event.slug, file_uuid, file_id, thumb_id)
             db.session.add(photo)
     db.session.commit()
     return stored
     
-@app.route('/<user_slug>/<event_slug>', methods=['GET', 'POST'])
+@app.route('/<user_slug>/<event_slug>/', methods=['GET', 'POST'])
 def upload(user_slug, event_slug):
     user = User.query.filter_by(userslug=user_slug).first_or_404()
-    event = Event.query.filter_by(slug=event_slug, user_id=user.id).first_or_404()
+    event = Event.query.filter_by(slug=event_slug,
+                                  user_id=user.id).first_or_404()
     if request.method == 'POST':
         for file_id in request.form.iterkeys():
             if is_uuid_file(file_id):
                 delete_files(file_id)
-        stored = process_uploads(request, user=user, event=event)
-        return render_template('upload.html', photos=stored, event=event, user=user)
-    return render_template('upload.html', event=event, user=user)
+        stored = process_uploads(request, event=event)
+        return render_template('upload.html', photos=stored,
+                               event=event)
+    return render_template('upload.html', event=event)
+
+@app.route('/<user_slug>/<event_slug>/view/')
+def gallery(user_slug, event_slug):
+    user = User.query.filter_by(userslug=user_slug).first_or_404()
+    event = Event.query.filter_by(slug=event_slug,
+                                  user_id=user.id).first_or_404()
+    photos = db.session.query(Photo).join(Photo.event).filter(Event.slug==event_slug).join(Event.user).filter(User.userslug==user_slug).all()
+    return render_template('gallery.html', photos=photos, event=event)
 
 @app.route('/jsupload/', methods=['POST'])
 def jsupload():
-    # TODO : update javascript to send user and event on upload http post
     url_path = urlparse(request.referrer).path
     path_parts = url_path.split('/')
-    if len(path_parts) != 3:
+    if len(path_parts) < 3:
         abort(403)
-    _, user_slug, event_slug = path_parts
+    _, user_slug, event_slug = path_parts[:3]
     user = User.query.filter_by(userslug=user_slug).first_or_404()
     event = Event.query.filter_by(slug=event_slug, user_id=user.id).first_or_404()
-    stored = process_uploads(request, user=user, event=event)
+    stored = process_uploads(request, event=event)
     return json.dumps(stored)
 
 @app.route('/upload/<filename>', methods=['GET', 'DELETE'])
