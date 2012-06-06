@@ -32,9 +32,9 @@
             </a>
             <a class="brand" href="{{ url_for('profile') }}">AllAngl.es</a>
             <div class="btn-group pull-right">
-                {% if user %}
+                {% if not current_user.is_anonymous() %}
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                  <i class="icon-user"></i>{{ user.name }}
+                  <i class="icon-user"></i>{{ current_user.name }}
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">

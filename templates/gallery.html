@@ -2,7 +2,7 @@
 {% block body %}
 <div class="container-fluid">
   <div class="row-fluid">
-{% if user %}
+{% if not current_user.is_anonymous() %}
     <div class="span2">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">

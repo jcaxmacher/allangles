@@ -21,12 +21,12 @@
       {% endfor %}
     {% endif %}
   {% endwith %}
-  {% if user.username %}
-  <h2>{{ user.username }}'s events</h2>
-  {% elif user.name %}
-  <h2>{{ user.name }}'s events</h2>
-  {% elif user.email %}
-  <h2>{{ user.email }}'s events</h2>
+  {% if current_user.username %}
+  <h2>{{ current_user.username }}'s events</h2>
+  {% elif current_user.name %}
+  <h2>{{ current_user.name }}'s events</h2>
+  {% elif current_user.email %}
+  <h2>{{ current_user.email }}'s events</h2>
   {% else %}
   <h2>Your events</h2>
   {% endif %}
@@ -40,7 +40,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for event in user.events %}
+      {% for event in current_user.events %}
       <tr>
         <td><a href="{{ url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug) }}">{{ event.name }}</a></td>
         <td>{{ event.date }}</td>
