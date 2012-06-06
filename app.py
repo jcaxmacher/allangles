@@ -407,7 +407,7 @@ def upload(user_slug, event_slug):
         stored = process_uploads(request, event=event)
         return render_template('upload.html', photos=stored,
                                event=event)
-    return render_template('upload.html', event=event)
+    return render_template('upload.html', event=event, user=current_user)
 
 @app.route('/<user_slug>/<event_slug>/view/')
 def gallery(user_slug, event_slug):
@@ -415,7 +415,7 @@ def gallery(user_slug, event_slug):
     event = Event.query.filter_by(slug=event_slug,
                                   user_id=user.id).first_or_404()
     photos = db.session.query(Photo).join(Photo.event).filter(Event.slug==event_slug).join(Event.user).filter(User.userslug==user_slug).all()
-    return render_template('gallery.html', photos=photos, event=event)
+    return render_template('gallery.html', photos=photos, event=event, user=current_user)
 
 @app.route('/jsupload/', methods=['POST'])
 def jsupload():
