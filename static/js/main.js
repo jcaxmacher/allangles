@@ -73,3 +73,11 @@ $(function () {
     }
 
 });
+
+jQuery(document).ready(function ($) {
+    $('#gallery a.cboxElement').colorbox({
+        current: "Image {current} of {total}",
+        onOpen: $.fullscreen.unbindKeyboard,
+        onClosed: $.fullscreen.bindKeyboard
+    });
+}

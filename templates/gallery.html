@@ -18,9 +18,9 @@
         <h1>{{ event.name }}</h1>
         <h2>for {{ event.user.name }}</h2>
     </div>
-    <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
+    <div id="gallery">
     {% for photo in photos %}
-        <a rel="gallery" href="{{ photo.url }}" title="">
+        <a class="cboxElement" rel="gallery" href="{{ photo.url }}">
             <img src="{{ photo.thumb_url }}">
         </a>
     {% endfor %}
