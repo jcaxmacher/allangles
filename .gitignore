@@ -1,5 +1,5 @@
 venv/
 *.swp
 *.pyc
-static/uploads/*
+allangles/static/uploads/*
 build/

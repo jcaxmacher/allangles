@@ -80,4 +80,4 @@ jQuery(document).ready(function ($) {
         onOpen: $.fullscreen.unbindKeyboard,
         onClosed: $.fullscreen.bindKeyboard
     });
-}
+});
