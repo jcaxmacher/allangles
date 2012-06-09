@@ -1,7 +1,8 @@
 from flask import (request, session, g, redirect, url_for, abort,
                    render_template, flash, send_from_directory)
 from flaskext.wtf import (Form, TextField, PasswordField, BooleanField,
-                          Required, EqualTo, RecaptchaField, ValidationError)
+                          Required, EqualTo, RecaptchaField,
+                          ValidationError, IntegerField)
 from wtforms.ext.dateutil.fields import DateField
 from flask.ext.login import (current_user, login_required, login_user,
                              logout_user, confirm_login,
@@ -36,6 +37,7 @@ class LoginForm(Form):
 class EventForm(Form):
     name = TextField('Event name', validators=[Required()])
     date = DateField('Date', validators=[Required()])
+    zip_code = IntegerField('Event Zip Code', validators=[Required()])
 
 class InitialProfileForm(Form):
     username = TextField('Choose a username', validators=[Required()])
@@ -121,7 +123,8 @@ def event():
         flash('Please confirm your email address before creating an event.', 'alert-error')
         return redirect(url_for('unconfirmed'))
     elif form.validate_on_submit():
-        event = Event(current_user.id, form.name.data, form.date.data)
+        event = Event(current_user.id, form.name.data,
+                      form.date.data, form.zip_code.data)
         db.session.add(event)
         db.session.commit()
         flash('Your event was created successfully!', 'alert-success')

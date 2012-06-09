@@ -53,15 +53,17 @@ class Event(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     date = db.Column(db.DateTime)
     photos = db.relationship('Photo', backref='event', lazy='dynamic')
+    zip_code = db.Column(db.Integer)
 
     def __repr__(self):
         return '<Event %r>' % self.name
 
-    def __init__(self, user_id, name, date):
+    def __init__(self, user_id, name, date, zip_code):
         self.user_id = user_id
         self.name = name
         self.date = date
         self.slug = slugify(name)
+        self.zip_code = zip_code
 
 class UserActivation(db.Model):
     __tablename__ = 'activations'
