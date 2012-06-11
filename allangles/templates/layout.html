@@ -31,8 +31,8 @@
                 <span class="icon-bar"></span>
             </a>
             <a class="brand" href="{{ url_for('profile') }}">AllAngl.es</a>
-            <div class="btn-group pull-right">
                 {% if not current_user.is_anonymous() %}
+                <div class="btn-group pull-right">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                   <i class="icon-user"></i>{{ current_user.name }}
                   <span class="caret"></span>
@@ -42,11 +42,14 @@
                   <li class="divider"></li>
                   <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
                 </ul>
+                </div>
                 {% else %}
-                  <a href="{{ url_for('login') }}">Log in</a> | 
-                  <a href="{{ url_for('signup') }}">Sign up</a>
+                <ul class="nav pull-right">
+                  <li><a href="{{ url_for('login') }}">Log in</a></li>
+                  <li class="divider-vertical"></li>
+                  <li><a href="{{ url_for('signup') }}">Sign up</a></li>
+                </ul>
                 {% endif %}
-            </div>
         </div>
     </div>
 </div>

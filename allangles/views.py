@@ -24,20 +24,20 @@ ses = boto.connect_ses(
 )
 
 class SignupForm(Form):
-    name = TextField('Your full name')
-    email = TextField('Email', validators=[Required()])
-    password = PasswordField('Password', validators=[Required()])
-    accept_tos = BooleanField('I accept the Terms of Service', validators=[Required()])
-    recaptcha = RecaptchaField()
+    name = TextField('<h4>Full name</h4>', validators=[Required()])
+    email = TextField('<h4>Email address</h4>', validators=[Required()])
+    username = TextField('<h4>Username<br><small>Choose a unique name. There are no rules. Smaller and simpler is better because your username will be part of the web address that event attendees use to send you photos.</small></h4>', validators=[Required()])
+    password = PasswordField('<h4>Password</h4>', validators=[Required()])
+    recaptcha = RecaptchaField('<h4>Fill in what you see<br><small>or use the buttons on the right to get a new picture or audio challenge if the one displayed is too cryptic.</small></h4>')
 
 class LoginForm(Form):
     email = TextField('Email')
     password = PasswordField('Password')
 
 class EventForm(Form):
-    name = TextField('Event name', validators=[Required()])
+    name = TextField('Name', validators=[Required()])
     date = DateField('Date', validators=[Required()])
-    zip_code = IntegerField('Event Zip Code', validators=[Required()])
+    zip_code = IntegerField('Zip Code', validators=[Required()])
 
 class InitialProfileForm(Form):
     username = TextField('Choose a username', validators=[Required()])
@@ -89,6 +89,8 @@ def signup():
         user = User()
         user.email = form.email.data
         user.name = form.name.data
+        user.username = form.username.data
+        user.userslug = slugify(form.username.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -99,7 +101,7 @@ def signup():
         flash('Your account was created successfully!', 'alert-success')
         ses.send_email(config.EMAIL,
             'Activate your AllAngl.es account',
-            'http://allangl.es/activate/%s' % user_activation.uuid,
+            'Please confirm your email address by clicking the following link: http://allangl.es/activate/%s If you did not sign up for an AllAngl.es account, you can safely ignore or delete this email.' % user_activation.uuid,
             [user.email])
         return redirect(url_for('unconfirmed'))
     return render_template('signup.html', form=form)
@@ -134,6 +136,8 @@ def event():
 @app.route('/events/')
 @login_required
 def events():
+    if not len(current_user.events.all()):
+        return redirect(url_for('event'))
     return render_template('events.html', user=current_user)
 
 @app.route('/home/')
@@ -200,7 +204,7 @@ def profile():
         db.session.add(current_user)
         db.session.commit()
         flash('Your username was added successfully.', 'alert-success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('events'))
     return render_template('profile.html', form=form, user=current_user)
 
 @app.route('/unconfirmed/')

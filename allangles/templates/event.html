@@ -2,11 +2,11 @@
 {% block body %}
 <div class="container-fluid">
 <div class="row-fluid">
-<div class="span8">
+<div class="span12">
 <form class="form-horizontal" id="createEvent" method='post' action="{{ url_for('event') }}">
     <fieldset>
 
-        <legend>Create an event</legend>
+        <legend><h2>Create an event</h2></legend>
         {% if form.errors %}
             <div class="alert alert-error">
                 <button class="close" data-dismiss="alert">x</button>
@@ -25,6 +25,13 @@
             {{ form.date.label(class="control-label") }}
             <div class="controls">
                 {{ form.date(class="input-large") }}
+            </div>
+        </div>
+
+        <div class="control-group">
+            {{ form.zip_code.label(class="control-label") }}
+            <div class="controls">
+                {{ form.zip_code(class="input-large") }}
             </div>
         </div>
 
