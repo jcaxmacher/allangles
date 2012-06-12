@@ -1,6 +1,11 @@
 import os
 from datetime import timedelta
 
+DATABASE = {
+    'name': 'dev.db',
+    'engine': 'peewee.SqliteDatabase'
+}
+
 DEBUG = True if os.environ.get('DEBUG') else False
 EMAIL = os.environ.get('OUTGOING_EMAIL', 'AllAngl.es Email Robot <robot@allangl.es>')
 
@@ -8,7 +13,9 @@ UPLOAD_PREFIX = '/upload'
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'allangles', 'static', 'uploads')
 ALLOWED_EXTENSIONS = set(['jpg', 'png', 'gif'])
-SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(os.getcwd(), 'dev.db')
+
+#SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % os.path.join(os.getcwd(), 'dev.db')
+
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'j2\xa9\xb7\xe4\xe4D\t\xc0\x052q\xfc\x8c\xe9\xbe\x0c\x0e#:\x9f\xc5\xa9\xcf'

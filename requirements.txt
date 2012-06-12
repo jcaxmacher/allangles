@@ -11,10 +11,13 @@ WTForms==1.0.1
 Wand==0.1.10
 Werkzeug==0.8.3
 boto==2.4.1
+-e git+https://github.com/coleifer/flask-peewee.git@253eaa2aa9477ab9b8d070d71baf8992500e45e8#egg=flask_peewee-dev
 httplib2==0.7.4
 oauth2==1.5.211
+peewee==0.9.7
 py-bcrypt==0.2
 python-dateutil==2.1
 six==1.1.0
 translitcodec==0.3
 wsgiref==0.1.2
+wtf-peewee==0.1.3

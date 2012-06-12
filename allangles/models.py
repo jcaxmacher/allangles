@@ -3,6 +3,7 @@ from datetime import datetime
 from flaskext.bcrypt import Bcrypt
 from allangles import db, app
 from allangles.utils import slugify
+from peewee import *
 
 bcrypt = Bcrypt(app)
 

@@ -8,13 +8,14 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, AnonymousUser
 from flask.ext.oauth import OAuth
 from allangles.middleware import MethodRewriteMiddleware
+from flask_pewee.db import Database
 
 app = Flask(__name__)
 app.config.from_object('allangles.configuration')
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 
 oauth = OAuth()
-db = SQLAlchemy(app)
+db = Database(app)
 
 login_manager = LoginManager()
 login_manager.anonymous_user = AnonymousUser
