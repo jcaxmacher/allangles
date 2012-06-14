@@ -1,0 +1,8 @@
+{% macro render_nav(active='events') %}
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li{% if active == 'events' %} class="active"{% endif %}><a href="{{ url_for('events') }}">Events</a></li>
+              <li{% if active == 'profile' %} class="active"{% endif %}><a href="{{ url_for('profile') }}">Account Profile</a></li>
+            </ul>
+          </div>
+{% endmacro %}

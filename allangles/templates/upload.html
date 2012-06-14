@@ -1,28 +1,36 @@
 {% extends "layout.html" %}
+{% from "_flashhelpers.html" import render_flashes %}
+{% from "_formhelpers.html" import link_button %}
+{% from "_navhelpers.html" import render_nav %}
 {% block body %}
 <div class="container-fluid">
   <div class="row-fluid">
 {% if not current_user.is_anonymous() %}
-    <div class="span2">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li><a href="{{ url_for('profile') }}">Account Profile</a></li>
-              <li class="active">
-                <a href="{{ url_for('events') }}">Events</a>
-              </li>
-            </ul>
-          </div>
-    </div> 
+    <div class="span2">{{ render_nav() }}</div> 
 {% endif %}
-    <div class="span10">
+    <div class="{% if not current_user.is_anonymous() %}span10{% else %}span12{% endif %}">
+    {{ render_flashes() }}
 
     <div class="page-header">
-        <h1>{{ event.name }}</h1>
-        <h2>for {{ event.user.name }}</h2>
+        <div><h1>{{ event.user.name }}
+        <div class="pull-right">
+        {{
+            link_button(
+                'View album',
+                url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug), 
+                icon='picture',
+                header='3'
+            )
+        }}
+        </div>
+        <small><h1>{{ event.name }}</h1></small></h1> 
+        </div>
     </div>
     <blockquote>
-        <p>Select the files you would like to upload using the Add files button, then click the Start upload button to upload them.
-        Once they are uploaded, you can review the photos and delete them if you need to.</p>
+        <p><ul>
+            <li>Select the photos you would like to upload using the Add files button</li>
+            <li>Click the Start upload button to upload them or the Cancel button to remove files queued for upload</li>
+        <li>Once the photo uploads are complete, you can review the photos and delete them if necessary</li></ul></p>
     </blockquote>
     <br>
     <!-- The file upload form used as target for the file upload widget -->

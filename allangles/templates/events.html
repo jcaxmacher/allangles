@@ -1,35 +1,14 @@
 {% extends "layout.html" %}
+{% from "_flashhelpers.html" import render_flashes %}
+{% from "_formhelpers.html" import link_button %}
+{% from "_navhelpers.html" import render_nav %}
 {% block body %}
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span2">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li><a href="{{ url_for('profile') }}">Account Profile</a></li>
-              <li class="active"><a href="{{ url_for('events') }}">Events</a></li>
-            </ul>
-          </div>
-    </div> 
+    <div class="span2">{{ render_nav(active='events') }}</div> 
     <div class="span10">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-         <div class="alert {{ category }}">
-             <button type="button" class="close" data-dismiss="alert">×</button>
-             {{ message }}
-         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% if current_user.username %}
-  <h2>{{ current_user.username }}'s events</h2>
-  {% elif current_user.name %}
-  <h2>{{ current_user.name }}'s events</h2>
-  {% elif current_user.email %}
-  <h2>{{ current_user.email }}'s events</h2>
-  {% else %}
-  <h2>Your events</h2>
-  {% endif %}
+    {{ render_flashes() }}
+    <h2>Your events</h2><br>
   <table class="table table-bordered table-striped">
   <thead>
       <tr>
@@ -42,14 +21,38 @@
     <tbody>
       {% for event in current_user.events %}
       <tr>
-        <td><a href="{{ url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug) }}">{{ event.name }}</a></td>
-        <td>{{ event.date }}</td>
-        <td>0</td>
+        <td>
+            {{ 
+                link_button(
+                   event.name,
+                   url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug),
+                   icon='picture',
+                   header='4'
+                )
+            }}
+        </td>
+        <td>{{ event.date.strftime('%Y-%m-%d') }}</td>
+        <td>{{ event.photos.count() }}</td>
   
-        <td><a class="btn" href="{{ url_for('upload', event_slug=event.slug, user_slug=user.userslug) }}">
-        <i class="icon-plus"></i> Add photos</a></td>
-        <td><a class="btn btn-danger" href="{{ url_for('event', event=event.id) }}">
-        <i class="icon-remove"></i> Delete event</a></td>
+        <td>
+            {{ 
+                link_button(
+                   'Add photos',
+                   url_for('upload', event_slug=event.slug, user_slug=user.userslug),
+                   icon='plus',
+                )
+            }}
+         </td>
+        <td>
+            {{ 
+                link_button(
+                   'Delete event (and all photos)',
+                   url_for('event', event=event.id),
+                   icon='remove',
+                   add_class='btn-danger'
+                )
+            }}
+         </td>
       </tr>
       {% else %}
       <tr>
@@ -58,7 +61,7 @@
       {% endfor %}
     </tbody>
   </table>
-  <a class="btn btn-primary" href="{{ url_for('event') }}">Add an Event</a>
+  {{ link_button('Add an Event', url_for('event'), add_class='btn-primary', header='4') }}
     </div>
   </div>
 </div>

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% from "_flashhelpers.html" import render_flashes %}
+{% from "_formhelpers.html" import render_field %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row-fluid">
+            <div class="span12">
+
+            {{ render_flashes() }}
+
+
+<form class="form-horizontal" id="createEvent" method='post' action="{{ url_for('add_username') }}">
+    <fieldset>
+
+        <legend><h2>Add a username to your account</h2></legend>
+
+        {{ render_field(form.username) }}
+        {{ form.hidden_tag() }}
+
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success">
+                    Update account
+                </button>
+            </div>
+        </div>
+
+    </fieldset>
+</form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

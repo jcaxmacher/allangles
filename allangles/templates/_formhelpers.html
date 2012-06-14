@@ -1,0 +1,46 @@
+{% macro render_field(field, disabled=False) %}
+    <div class="control-group {% if field.errors %}error{% endif %}">
+        <label for="{{ field.label.field_id }}" class="control-label">
+            <h4>
+                {{ field.label.text }}
+                {% if field.description %}
+                    <br><small>{{ field.description }}</small>
+                {% endif %}
+            </h4>
+        </label>
+        <div class="controls">
+        {% if disabled %}
+            {{ field(class="input-large disabled", disabled="disabled")|safe }}
+        {% else %}
+            {{ field(class="input-large")|safe }}
+        {% endif %}
+            <span class="help-inline">
+                {% for error in field.errors %}
+                    {{ error|safe }}&nbsp;
+                {% endfor %}
+            </span>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_login_field(field) %}
+    <div class="control-group">
+        <label for="{{ field.label.field_id }}" class="control-label">
+            <h4>{{ field.label.text }}</h4>
+        </label>
+        <div class="controls">
+            {{ field(class="input-large")|safe }}
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro link_button(text, href, icon=None, header=None, add_class=None) %}
+    <a class="btn{% if add_class %} {{ add_class }}{% endif %}" href="{{ href }}">
+    {% if header %}<h{{ header }}>{% endif %}
+        {{ text }}
+        {% if icon %}
+            <i class="icon-{{ icon }}"></i>
+        {% endif %}
+    {% if header %}</h{{ header }}>{% endif %}
+    </a>
+{% endmacro %}

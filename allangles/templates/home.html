@@ -1,35 +1,19 @@
 {% extends "layout.html" %}
+{% from "_flashhelpers.html" import render_flashes %}
 {% block body %}
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span2">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
-              <li><a href="{{ url_for('profile') }}">Account Profile</a></li>
               <li class="active"><a href="{{ url_for('events') }}">Events</a></li>
+              <li><a href="{{ url_for('profile') }}">Account Profile</a></li>
             </ul>
           </div>
     </div> 
     <div class="span10">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-         <div class="alert {{ category }}">
-             <button type="button" class="close" data-dismiss="alert">×</button>
-             {{ message }}
-         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-  {% if user.username %}
-  <h2>{{ user.username }}'s events</h2>
-  {% elif user.name %}
-  <h2>{{ user.name }}'s events</h2>
-  {% elif user.email %}
-  <h2>{{ user.email }}'s events</h2>
-  {% else %}
-  <h2>Your events</h2>
-  {% endif %}
+    {{ render_flashes() }}
+    <h2>Your events</h2>
   <table class="table table-bordered table-striped">
   <thead>
       <tr>

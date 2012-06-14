@@ -1,90 +1,30 @@
 {% extends "layout.html" %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_flashhelpers.html" import render_flashes %}
 {% block body %}
 <div class="container">
 <div class="row">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-         <div class="alert {{ category }}">
-             <button type="button" class="close" data-dismiss="alert">×</button>
-             {{ message }}
-         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  {{ render_flashes() }}
 <div class="span12">
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('signup') }}">
     <fieldset>
 
         <legend><h2>Sign up</h2></legend>
 
-        <div class="control-group {% if form.errors.get('name') %}error{% endif %}">
-            {{ form.name.label(class="control-label") }}
-            <div class="controls">
-                {{ form.name(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('name', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-        
-        <div class="control-group {% if form.errors.get('email') %}error{% endif %}">
-            {{ form.email.label(class="control-label") }}
-            <div class="controls">
-                {{ form.email(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('email', []) %}
-                        {{ error|safe }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
-        <div class="control-group {% if form.errors.get('username') %}error{% endif %}">
-            {{ form.username.label(class="control-label") }}
-            <div class="controls">
-                {{ form.username(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('username', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
-        <div class="control-group {% if form.errors.get('password') %}error{% endif %}">
-            {{ form.password.label(class="control-label") }}
-            <div class="controls">
-                {{ form.password(class="input-large") }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('password', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
-        <div class="control-group {% if form.errors.get('recaptcha') %}error{% endif %}">
-            {{ form.recaptcha.label(class="control-label") }}
-            <div class="controls">
-                {{ form.recaptcha(class="input-large")|safe }}
-                <span class="help-inline">
-                    {% for error in form.errors.get('recaptcha', []) %}
-                        {{ error }}&nbsp;
-                    {% endfor %}
-                </span>
-            </div>
-        </div>
-
+        {{ render_field(form.name) }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.username) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.recaptcha) }}
         {{ form.hidden_tag() }}
 
         <div class="form-actions">
-                <button type="submit" class="btn btn-success" >Create My Account</button>
-
-                <a href="{{ url_for('fblogin') }}" class="btn btn-primary">or use Facebook login</a>
-                
+            <button type="submit" class="btn btn-success">
+                Create My Account
+            </button>
+            <a href="{{ url_for('fblogin') }}" class="btn btn-primary">
+                or use Facebook login
+            </a>
         </div>
 
     </fieldset>

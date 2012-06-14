@@ -25,11 +25,23 @@ ses = boto.connect_ses(
 )
 
 class SignupForm(Form):
-    name = TextField('<h4>Full name</h4>', validators=[Required()])
-    email = TextField('<h4>Email address</h4>', validators=[Required()])
-    username = TextField('<h4>Username<br><small>Choose a unique name. There are no rules. Smaller and simpler is better because your username will be part of the web address that event attendees use to send you photos.</small></h4>', validators=[Required()])
-    password = PasswordField('<h4>Password</h4>', validators=[Required()])
-    recaptcha = RecaptchaField('<h4>Fill in what you see<br><small>or use the buttons on the right to get a new picture or audio challenge if the one displayed is too cryptic.</small></h4>')
+    name = TextField('Full name', validators=[Required()])
+    email = TextField('Email address', validators=[Required()])
+    username = TextField(
+        'Username',
+        description = """Choose a unique name. There are no rules.
+                         Smaller and simpler is better because your
+                         username will be part of the web address
+                         that event attendees use to send you photos.""",
+        validators=[Required()]
+    )
+    password = PasswordField('Password', validators=[Required()])
+    recaptcha = RecaptchaField(
+        'Fill in what you see',
+        description="""or use the buttons on the right to
+                       get a new picture or audio challenge
+                       if the one displayed is too cryptic."""
+    )
 
 class LoginForm(Form):
     email = TextField('Email')
@@ -40,27 +52,45 @@ class EventForm(Form):
     date = DateField('Date', validators=[Required()])
     zip_code = IntegerField('Zip Code', validators=[Required()])
 
-class InitialProfileForm(Form):
-    username = TextField('Choose a username', validators=[Required()])
+class UsernameForm(Form):
+    username = TextField(
+        'Choose a username',
+        description = """Choose a unique name. There are no rules.
+                         Smaller and simpler is better because your
+                         username will be part of the web address
+                         that event attendees use to send you photos.""",
+        validators=[Required()]
+    ) 
+
+class ProfileForm(Form):
+    name = TextField('Full name', validators=[Required()])
+    email = TextField('Email address', validators=[Required()])
+    username = TextField('Username', validators=[Required()])
 
 def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if current_user.is_authenticated():
-            return redirect(url_for('profile'))
+            return redirect(url_for('events'))
         else:
             return f(*args, **kwargs)
     return wrapper
 
-def username_selected(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if current_user.userslug:
-            return f(*args, **kwargs)
-        else:
-            return redirect(url_for('profile'))
-    return wrapper
-    
+def username_required(required=True):
+    def username_check(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            # We can continue on if we have a userslug and it's required
+            # or if we do not have it and shouldn't
+            if ((current_user.userslug and required) or
+                (not current_user.userslug and not required)):
+                return f(*args, **kwargs)
+            else:
+                flash('You must add a username before proceeding.', 'alert-success')
+                return redirect(url_for('add_username'))
+        return wrapper
+    return username_check
+
 @app.route('/login/', methods=['GET', 'POST'])
 @not_logged_in
 def login():
@@ -70,7 +100,7 @@ def login():
         if not user or not user.check_password(form.password.data):
             form.errors['email'] = [u'Incorrect email or password.']
         elif login_user(user, remember=True, force=True):
-            return redirect(request.args.get('next') or url_for('profile'))
+            return redirect(request.args.get('next') or url_for('events'))
     return render_template('login.html', form=form)
 
 @app.route('/fblogin/')
@@ -105,6 +135,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
         except IntegrityError as e:
+            db.session.rollback()
             if 'column userslug' in str(e):
                 form.username.errors.append('Sorry, that username is not available.  Please choose another.')
             if 'column email' in str(e):
@@ -131,11 +162,11 @@ def activate(uuid):
     db.session.delete(activation)
     db.session.commit()
     flash('Your account was successfully activated!', 'alert-success')
-    return redirect(url_for('profile'))
+    return redirect(url_for('events'))
 
 @app.route('/event/', methods=['GET', 'POST'])
-@username_selected
 @login_required
+@username_required()
 def event():
     form = EventForm()
     if not current_user.activate:
@@ -151,16 +182,17 @@ def event():
     return render_template('event.html', form=form, user=current_user)
 
 @app.route('/events/')
-@username_selected
 @login_required
+@username_required()
 def events():
     if not len(current_user.events.all()):
+        flash('Please add your first event.', 'alert-success')
         return redirect(url_for('event'))
     return render_template('events.html', user=current_user)
 
 @app.route('/home/')
-@username_selected
 @login_required
+@username_required()
 def home():
     return render_template('home.html', user=current_user)
 
@@ -210,21 +242,27 @@ def serve(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
-@app.route('/profile/', methods=['POST', 'GET'])
+@app.route('/addusername/', methods=['POST', 'GET'])
 @login_required
-def profile():
-    form = InitialProfileForm()
+@username_required(False)
+def add_username():
+    form = UsernameForm()
     if not current_user.activate:
         flash('Please confirm your email address before attempting to add a username', 'alert-error')
         return redirect(url_for('unconfirmed'))
     elif form.validate_on_submit():
         current_user.username = form.username.data
         current_user.userslug = slugify(current_user.username)
-        db.session.add(current_user)
-        db.session.commit()
+        try:
+            db.session.add(current_user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            form.username.errors.append('Sorry, that username is not available.  Please choose another.')
+            return render_template('add_username.html', form=form, user=current_user)
         flash('Your username was added successfully.', 'alert-success')
         return redirect(url_for('events'))
-    return render_template('profile.html', form=form, user=current_user)
+    return render_template('add_username.html', form=form, user=current_user)
 
 @app.route('/unconfirmed/')
 @login_required
@@ -240,10 +278,17 @@ def resend():
     db.session.commit()
     return redirect(url_for('unconfirmed'))
 
+@app.route('/profile/')
+@login_required
+@username_required()
+def profile():
+    form = ProfileForm(obj=current_user)
+    return render_template('profile.html', form=form)
+
 @app.route('/fblogin/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
-    next_url = request.args.get('next') or url_for('profile')
+    next_url = request.args.get('next') or url_for('events')
     if resp is None:
         flash('You denied the login')
         return redirect(next_url)
