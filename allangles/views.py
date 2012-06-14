@@ -7,6 +7,7 @@ from wtforms.ext.dateutil.fields import DateField
 from flask.ext.login import (current_user, login_required, login_user,
                              logout_user, confirm_login,
                              fresh_login_required)
+from sqlalchemy.exc import IntegrityError
 from functools import wraps
 from urlparse import urlparse
 import translitcodec
@@ -92,8 +93,15 @@ def signup():
         user.username = form.username.data
         user.userslug = slugify(form.username.data)
         user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError as e:
+            if 'column userslug' in str(e):
+                form.username.errors.append('Sorry, that username is not available.  Please choose another.')
+            if 'column email' in str(e):
+                form.email.errors.append('It appears that email is already in use. Send an email to <a href="mailto:robot@allangl.es">robot@allangl.es</a> to request a password reset.')
+            return render_template('signup.html', form=form)
         login_user(user, remember=True, force=True)
         user_activation = UserActivation(user_id = user.id)
         db.session.add(user_activation)
@@ -106,6 +114,9 @@ def signup():
         return redirect(url_for('unconfirmed'))
     return render_template('signup.html', form=form)
 
+@app.route('/resetpassword/')
+def reset_password():
+    pass
 @app.route('/activate/<uuid>')
 def activate(uuid):
     activation = UserActivation.query.filter_by(uuid=uuid).first_or_404()

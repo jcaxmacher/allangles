@@ -36,7 +36,7 @@
                 {{ form.email(class="input-large") }}
                 <span class="help-inline">
                     {% for error in form.errors.get('email', []) %}
-                        {{ error }}&nbsp;
+                        {{ error|safe }}&nbsp;
                     {% endfor %}
                 </span>
             </div>
