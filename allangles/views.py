@@ -51,6 +51,15 @@ def not_logged_in(f):
         else:
             return f(*args, **kwargs)
     return wrapper
+
+def username_selected(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if current_user.userslug:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('profile'))
+    return wrapper
     
 @app.route('/login/', methods=['GET', 'POST'])
 @not_logged_in
@@ -79,7 +88,6 @@ def logout():
 
 @app.route('/')
 def index():
-    print url_for('facebook_authorized')
     return redirect(url_for('signup'))
 
 @app.route('/signup/', methods=['GET', 'POST'])
@@ -114,9 +122,6 @@ def signup():
         return redirect(url_for('unconfirmed'))
     return render_template('signup.html', form=form)
 
-@app.route('/resetpassword/')
-def reset_password():
-    pass
 @app.route('/activate/<uuid>')
 def activate(uuid):
     activation = UserActivation.query.filter_by(uuid=uuid).first_or_404()
@@ -129,6 +134,7 @@ def activate(uuid):
     return redirect(url_for('profile'))
 
 @app.route('/event/', methods=['GET', 'POST'])
+@username_selected
 @login_required
 def event():
     form = EventForm()
@@ -145,6 +151,7 @@ def event():
     return render_template('event.html', form=form, user=current_user)
 
 @app.route('/events/')
+@username_selected
 @login_required
 def events():
     if not len(current_user.events.all()):
@@ -152,6 +159,7 @@ def events():
     return render_template('events.html', user=current_user)
 
 @app.route('/home/')
+@username_selected
 @login_required
 def home():
     return render_template('home.html', user=current_user)
