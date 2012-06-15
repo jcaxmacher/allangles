@@ -75,8 +75,8 @@ def process_uploads(request, event=None):
             size = os.stat(filename).st_size
 
             stored.append({'name': 'View a larger version', 'size': size,
-                'url': '/upload/%s' % file_id,
-                'thumbnail_url': '/upload/%s' % thumb_id,
+                'url': '/static/uploads/%s' % file_id,
+                'thumbnail_url': '/static/uploads/%s' % thumb_id,
                 'delete_url': '/upload/%s' % file_id,
                 'delete_type': 'DELETE',
                 'file_id': file_id

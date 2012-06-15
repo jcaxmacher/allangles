@@ -4,7 +4,7 @@ from datetime import timedelta
 DEBUG = True if os.environ.get('DEBUG') else False
 EMAIL = os.environ.get('OUTGOING_EMAIL', 'AllAngl.es Email Robot <robot@allangl.es>')
 
-UPLOAD_PREFIX = '/upload'
+UPLOAD_PREFIX = '/static/uploads'
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'allangles', 'static', 'uploads')
 ALLOWED_EXTENSIONS = set(['jpg', 'png', 'gif'])
