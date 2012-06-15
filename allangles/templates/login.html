@@ -7,8 +7,8 @@
           <h1 class="sect-head bg-orange">Log in</h1>
         </header>
          <div class="row">
-  {{ render_flashes() }}
            <div class="span12">
+  {{ render_flashes() }}
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('login') }}">
     <fieldset>
 
@@ -41,4 +41,5 @@
 </div>
 </div>
 </div>
+</section>
 {% endblock %}
