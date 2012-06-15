@@ -28,7 +28,7 @@
     </div>
     <div id="galleria">
     {% for photo in photos %}
-        <a href="{{ photo.url }}">
+        <a href="{{ photo.web_url }}">
             <img src="{{ photo.thumb_url }}">
         </a>
     {% else %}

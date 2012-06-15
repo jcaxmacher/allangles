@@ -12,7 +12,7 @@ class User(db.Model):
     name = db.Column(db.String(60))
     username = db.Column(db.String(60))
     userslug = db.Column(db.String(60), unique=True)
-    pwdhash = db.Column(db.String())
+    pwdhash = db.Column(db.String(200))
     email = db.Column(db.String(60), unique=True)
     activate = db.Column(db.Boolean)
     created = db.Column(db.DateTime)
@@ -91,7 +91,10 @@ class Photo(db.Model):
     created = db.Column(db.DateTime)
     cloud_hosted = db.Column(db.Boolean)
     original = db.Column(db.String(60))
+    web = db.Column(db.String(60))
     thumb = db.Column(db.String(60))
+    owner_uuid = db.Column(db.String(60))
+    owner_name = db.Column(db.String(200))
     __table_args__ = (db.ForeignKeyConstraint([user_id, event_slug],
                                               [Event.user_id, Event.slug]),
                       {})
@@ -100,6 +103,10 @@ class Photo(db.Model):
         return u'%s/%s' % (app.config.get('UPLOAD_PREFIX'), self.thumb)
     thumb_url = property(get_thumb_url)
 
+    def get_web_url(self):
+        return u'%s/%s' % (app.config.get('UPLOAD_PREFIX'), self.web)
+    web_url = property(get_web_url)
+
     def get_url(self):
         return u'%s/%s' % (app.config.get('UPLOAD_PREFIX'), self.original)
     url = property(get_url)
@@ -107,11 +114,13 @@ class Photo(db.Model):
     def __repr__(self):
         return '<Photo %r>' % self.uuid
 
-    def __init__(self, user_id, event_slug, uuid, original, thumb):
+    def __init__(self, user_id, event_slug, uuid, original, thumb, web, owner_uuid):
         self.user_id = user_id
         self.event_slug = event_slug
-        self.uuid = str(uuid)
+        self.uuid = uuid
         self.cloud_hosted = False
         self.created = datetime.utcnow() 
         self.original = original
         self.thumb = thumb
+        self.web = web
+        self.owner_uuid = owner_uuid

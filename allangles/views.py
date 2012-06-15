@@ -67,6 +67,11 @@ class ProfileForm(Form):
     email = TextField('Email address', validators=[Required()])
     username = TextField('Username', validators=[Required()])
 
+@app.before_request
+def before_request():
+    if not session.get('owner_uuid'):
+        session['owner_uuid'] = str(uuid.uuid4())
+
 def not_logged_in(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -229,9 +234,15 @@ def jsupload():
     stored = process_uploads(request, event=event)
     return json.dumps(stored)
 
-@app.route('/upload/<filename>', methods=['GET', 'DELETE'])
-def serve(filename):
+@app.route('/upload/<file_uuid>', methods=['GET', 'DELETE'])
+def serve(file_uuid):
     if request.method == 'DELETE':
+        photo = Photo.query.filter_by(uuid=file_uuid).first_or_404()
+        if session['owner_uuid'] != photo.owner_uuid and photo.user.id != current_user.id:
+            abort(401)
+        filename = photo.original
+        db.session.delete(photo)
+        db.session.commit()
         result = delete_files(filename)
         return '', result
     return send_from_directory(app.config['UPLOAD_FOLDER'],
