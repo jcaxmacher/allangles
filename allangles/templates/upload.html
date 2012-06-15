@@ -28,6 +28,7 @@
     </div>
     <blockquote>
         <p><ul>
+            <li>Enter your name, if you would like to record it with your photos (optional).</li>
             <li>Select the photos you would like to upload using the Add files button</li>
             <li>Click the Start upload button to upload them or the Cancel button to remove files queued for upload</li>
         <li>Once the photo uploads are complete, you can review the photos and delete them if necessary</li>
@@ -40,6 +41,11 @@
         <div class="row-fluid fileupload-buttonbar">
             <div class="span7">
                 <!-- The fileinput-button span is used to style the file input field as button -->
+
+                <div class="well">
+                <label for="owner_name" class="control-label"><strong>Your name (optional)</strong></label>
+                <input class="input-large" id="owner_name" name="owner_name" type="text" value>
+                </div>
                 <span class="btn btn-success fileinput-button">
                     <i class="icon-plus icon-white"></i>
                     <span>Add files...</span>

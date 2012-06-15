@@ -114,7 +114,8 @@ class Photo(db.Model):
     def __repr__(self):
         return '<Photo %r>' % self.uuid
 
-    def __init__(self, user_id, event_slug, uuid, original, thumb, web, owner_uuid):
+    def __init__(self, user_id, event_slug, uuid, original, thumb,
+        web, owner_uuid, owner_name):
         self.user_id = user_id
         self.event_slug = event_slug
         self.uuid = uuid
@@ -124,3 +125,4 @@ class Photo(db.Model):
         self.thumb = thumb
         self.web = web
         self.owner_uuid = owner_uuid
+        self.owner_name = owner_name
