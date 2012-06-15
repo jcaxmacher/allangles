@@ -233,3 +233,10 @@ p {
   font-size: 16px;
   line-height: 18px;
 }
+#login-regi {
+    margin-left: 0px;
+    margin-right: -25px;
+}
+.form-actions-white {
+    background-color: white;
+}

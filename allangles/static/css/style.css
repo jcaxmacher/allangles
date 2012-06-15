@@ -13,4 +13,7 @@
 body{
   padding-top: 60px;
 }
-
+.no-left-margin {
+    margin-left: 0px;
+    margin-right: -25px;
+}

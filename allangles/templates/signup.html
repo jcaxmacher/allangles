@@ -1,15 +1,16 @@
-{% extends "layout.html" %}
+{% extends "frontlayout.html" %}
 {% from "_formhelpers.html" import render_field %}
 {% from "_flashhelpers.html" import render_flashes %}
 {% block body %}
-<div class="container">
-<div class="row">
+      <section>
+        <header>
+          <h1 class="sect-head bg-blue">Sign up</h1>
+        </header>
+         <div class="row">
   {{ render_flashes() }}
-<div class="span12">
+           <div class="span12">
 <form class="form-horizontal" id="registerHere" method='post' action="{{ url_for('signup') }}">
     <fieldset>
-
-        <legend><h2>Sign up</h2></legend>
 
         {{ render_field(form.name) }}
         {{ render_field(form.email) }}
@@ -18,18 +19,17 @@
         {{ render_field(form.recaptcha) }}
         {{ form.hidden_tag() }}
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-success">
+        <div class="form-actions form-actions-white">
+            <button type="submit" class="btn btn-success btn-large">
                 Create My Account
             </button>
-            <a href="{{ url_for('fblogin') }}" class="btn btn-primary">
+            <a href="{{ url_for('fblogin') }}" class="btn btn-primary btn-large">
                 or use Facebook login
             </a>
         </div>
 
     </fieldset>
 </form>
-</div>
 </div>
 </div>
 {% endblock %}

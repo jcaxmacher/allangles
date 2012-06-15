@@ -31,6 +31,10 @@
         <a href="{{ photo.url }}">
             <img src="{{ photo.thumb_url }}">
         </a>
+    {% else %}
+        <a href="/static/img/nophotos.gif">
+            <img src="/static/img/thumb-nophotos.gif">
+        </a>
     {% endfor %}
     </div> 
 
