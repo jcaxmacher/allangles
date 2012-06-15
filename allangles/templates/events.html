@@ -27,7 +27,8 @@
                    event.name,
                    url_for('gallery', user_slug=event.user.userslug, event_slug=event.slug),
                    icon='picture',
-                   header='4'
+                   header='4',
+                   add_class='btn-large'
                 )
             }}
         </td>
@@ -51,7 +52,7 @@
       {% endfor %}
     </tbody>
   </table>
-  {{ link_button('Add an Event', url_for('event'), add_class='btn-primary', header='4') }}
+  {{ link_button('Add an event', url_for('event'), add_class='btn-primary btn-large') }}
     </div>
   </div>
 </div>

@@ -49,8 +49,14 @@ class LoginForm(Form):
 
 class EventForm(Form):
     name = TextField('Name', validators=[Required()])
-    date = DateField('Date', validators=[Required()])
-    zip_code = IntegerField('Zip Code', validators=[Required()])
+    date = DateField('Date', description="For example, 1/17/1982",
+        validators=[Required()])
+    zip_code = IntegerField(
+        'Zip Code',
+        description = """This field is optional. But will allow
+                         us to map your events in an upcoming
+                         AllAngles feature."""
+    )
 
 class UsernameForm(Form):
     username = TextField(

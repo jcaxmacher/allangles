@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "_formhelpers.html" import render_field %}
 {% from "_flashhelpers.html" import render_flashes %}
 {% from "_navhelpers.html" import render_nav %}
 {% block body %}
@@ -13,40 +14,16 @@
     <fieldset>
 
         <legend><h2>Create an event</h2></legend>
-        {% if form.errors %}
-            <div class="alert alert-error">
-                <button class="close" data-dismiss="alert">x</button>
-                {{ form.errors.values()[0][0] }}
-            </div>
-        {% endif %}
 
-        <div class="control-group">
-            {{ form.name.label(class="control-label") }}
-            <div class="controls">
-                {{ form.name(class="input-large") }}
-            </div>
-        </div>
-
-        <div class="control-group">
-            {{ form.date.label(class="control-label") }}
-            <div class="controls">
-                {{ form.date(class="input-large") }}
-            </div>
-        </div>
-
-        <div class="control-group">
-            {{ form.zip_code.label(class="control-label") }}
-            <div class="controls">
-                {{ form.zip_code(class="input-large") }}
-            </div>
-        </div>
-
+        {{ render_field(form.name) }}
+        {{ render_field(form.date) }}
+        {{ render_field(form.zip_code) }}
         {{ form.hidden_tag() }}
 
         <div class="control-group">
             <label class="control-label"></label>
             <div class="controls">
-                <button type="submit" class="btn btn-success">Create event</button>
+                <button type="submit" class="btn btn-success btn-large">Create event</button>
             </div>
         </div>
 
