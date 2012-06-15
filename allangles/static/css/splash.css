@@ -220,3 +220,16 @@ img {
 .footer h6 {
     color: #aaa;
 }
+.hero-unit {
+    padding-top: 30px;
+    padding-bottom: 20px;
+}
+.btn-massive {
+    font-size: 32px;
+}
+p {
+  margin: 0 0 9px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 18px;
+}
