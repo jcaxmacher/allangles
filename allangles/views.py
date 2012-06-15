@@ -116,9 +116,6 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/')
-def index():
-    return redirect(url_for('signup'))
 
 @app.route('/signup/', methods=['GET', 'POST'])
 @not_logged_in
@@ -190,10 +187,8 @@ def events():
         return redirect(url_for('event'))
     return render_template('events.html', user=current_user)
 
-@app.route('/home/')
-@login_required
-@username_required()
-def home():
+@app.route('/')
+def index():
     return render_template('home.html', user=current_user)
 
 @app.route('/photos/<event>')

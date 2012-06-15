@@ -35,9 +35,9 @@ def make_thumb(filename, thumb_filename, max_dim=80, max_width=80, max_height=80
         width, height = scale_dimensions(img, max_size=max_dim)
         with img.clone() as clone:
             clone.resize(width, height)
-            clone.crop(left=(clone.width - max_width) / 2,
-                       top=(clone.height - max_height) / 2,
-                       width=max_width, height=max_height)
+            #clone.crop(left=(clone.width - max_width) / 2,
+            #           top=(clone.height - max_height) / 2,
+            #           width=max_width, height=max_height)
             clone.save(filename=thumb_filename)
     
 def delete_files(file_id, prefixes=['', 'thumb-']):
