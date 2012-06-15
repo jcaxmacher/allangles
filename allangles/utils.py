@@ -65,6 +65,7 @@ def is_uuid_file(file):
 def process_uploads(request, event=None):
     stored = []
     owner_name = request.form.get('owner_name').strip() or None
+    description = request.form.get('description').strip() or None
     for file in request.files.getlist('file'):
         if file and allowed_file(file.filename):
 
@@ -100,7 +101,8 @@ def process_uploads(request, event=None):
 
             from allangles.models import Photo
             photo = Photo(event.user_id, event.slug, file_uuid, file_id,
-                thumb_id, web_id, session['owner_uuid'], owner_name)
+                thumb_id, web_id, session['owner_uuid'], owner_name,
+                description)
             db.session.add(photo)
     db.session.commit()
     return stored

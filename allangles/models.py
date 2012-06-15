@@ -95,6 +95,7 @@ class Photo(db.Model):
     thumb = db.Column(db.String(60))
     owner_uuid = db.Column(db.String(60))
     owner_name = db.Column(db.String(60))
+    description = db.Column(db.String(255))
     __table_args__ = (db.ForeignKeyConstraint([user_id, event_slug],
                                               [Event.user_id, Event.slug]),
                       {})
@@ -115,7 +116,7 @@ class Photo(db.Model):
         return '<Photo %r>' % self.uuid
 
     def __init__(self, user_id, event_slug, uuid, original, thumb,
-        web, owner_uuid, owner_name):
+        web, owner_uuid, owner_name, description):
         self.user_id = user_id
         self.event_slug = event_slug
         self.uuid = uuid
@@ -125,4 +126,5 @@ class Photo(db.Model):
         self.thumb = thumb
         self.web = web
         self.owner_uuid = owner_uuid
-        self.owner_name = owner_name[:60]
+        self.owner_name = owner_name[:60] if owner_name else owner_name
+        self.description = description

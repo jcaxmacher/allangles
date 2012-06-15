@@ -29,7 +29,7 @@
     <div id="galleria">
     {% for photo in photos %}
         <a href="{{ photo.web_url }}">
-            <img src="{{ photo.thumb_url }}">
+            <img {% if photo.owner_name %}title="by {{ photo.owner_name }}" alt="{% if photo.description %}{{ photo.description }}{% endif %}"{% endif %} src="{{ photo.thumb_url }}">
         </a>
     {% else %}
         <a href="/static/img/nophotos.gif">
