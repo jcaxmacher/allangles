@@ -94,7 +94,7 @@ class Photo(db.Model):
     web = db.Column(db.String(60))
     thumb = db.Column(db.String(60))
     owner_uuid = db.Column(db.String(60))
-    owner_name = db.Column(db.String(200))
+    owner_name = db.Column(db.String(60))
     __table_args__ = (db.ForeignKeyConstraint([user_id, event_slug],
                                               [Event.user_id, Event.slug]),
                       {})
@@ -125,4 +125,4 @@ class Photo(db.Model):
         self.thumb = thumb
         self.web = web
         self.owner_uuid = owner_uuid
-        self.owner_name = owner_name
+        self.owner_name = owner_name[:60]
