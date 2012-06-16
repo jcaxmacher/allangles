@@ -107,7 +107,7 @@ def username_required(required=True):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if not user or not user.check_password(form.password.data):
             form.errors['email'] = [u'Incorrect email or password.']
         elif login_user(user, remember=True, force=True):
@@ -134,7 +134,7 @@ def signup():
     form = SignupForm()
     if form.validate_on_submit():
         user = User()
-        user.email = form.email.data
+        user.email = form.email.data.lower()
         user.name = form.name.data
         user.username = form.username.data
         user.userslug = slugify(form.username.data)
@@ -312,7 +312,7 @@ def facebook_authorized(resp):
     if user is None:
         user = User()
         user.fb_id = me.data['id']
-        user.email = me.data['email']
+        user.email = me.data['email'].lower()
         user.name = me.data['name']
         user.activate = True
         db.session.add(user)
