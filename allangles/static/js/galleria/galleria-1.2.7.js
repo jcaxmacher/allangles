@@ -1937,7 +1937,7 @@ Galleria = function() {
             lightbox.initialized = true;
 
             // create some elements to work with
-            var elems = 'overlay box content shadow title info close prevholder prev nextholder next counter image',
+            var elems = 'overlay box content shadow title info download close prevholder prev nextholder next counter image',
                 el = {},
                 op = self._options,
                 css = '',
@@ -1951,6 +1951,7 @@ Galleria = function() {
                     content:    abs+'background-color:#fff;top:10px;left:10px;right:10px;bottom:10px;overflow:hidden',
                     info:       abs+'bottom:10px;left:10px;right:10px;color:#444;font:11px/13px arial,sans-serif;height:13px',
                     close:      abs+'top:10px;right:10px;height:20px;width:20px;background:#fff;text-align:center;cursor:pointer;color:#444;font:16px/22px arial,sans-serif;z-index:99999',
+                    download:   abs+'top:10px;right:60px;height:20px;width:20px;background:#fff;text-align:center;cursor:pointer;color:#444;font:16px/22px arial,sans-serif;z-index:99999',
                     image:      abs+'top:10px;left:10px;right:10px;bottom:30px;overflow:hidden;display:block;',
                     prevholder: abs+'width:50%;top:0;bottom:40px;cursor:pointer;',
                     nextholder: abs+'width:50%;top:0;bottom:40px;right:-1px;cursor:pointer;',
@@ -1995,7 +1996,7 @@ Galleria = function() {
 
             // append the elements
             $.each({
-                    box: 'shadow content close prevholder nextholder',
+                    box: 'shadow content download close prevholder nextholder',
                     info: 'title counter',
                     content: 'info image',
                     prevholder: 'prev',

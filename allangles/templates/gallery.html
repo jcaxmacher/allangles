@@ -42,7 +42,7 @@
 </div>
 {% endblock %}
 {% block script %}
-<script src="/static/js/galleria/galleria-1.2.7.min.js"></script>
+<script src="/static/js/galleria/galleria-1.2.7.js"></script>
 <!-- The localization script -->
 <script src="/static/js/locale.js"></script>
 <!-- The main application script -->
@@ -51,8 +51,18 @@
     // Load the classic theme
     Galleria.loadTheme('/static/js/galleria/themes/folio/galleria.folio.min.js');
     
-    // Initialize Galleria
-    $('#galleria').galleria();
+    // bind the method to Galleria.ready
+    Galleria.ready(function(options) {
+
+    // this = the gallery instance
+    // options = the gallery options
+
+        this.appendChild("stage", "<div class=mine>" + this.getData().title + "</div>");
+    });
+
+    // now call galleria on all containers with the className 'galleria'
+    // the method above will be called on all galleries when initialized
+    Galleria.run('#galleria');
  
     </script> 
 
