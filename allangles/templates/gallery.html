@@ -54,15 +54,23 @@
     // bind the method to Galleria.ready
     Galleria.ready(function(options) {
 
-    // this = the gallery instance
-    // options = the gallery options
+        // this = the gallery instance
+        // options = the gallery options
+        this.appendChild("stage",
+            '<div id="download" class="download-ico"></div>');
 
-        this.appendChild("stage", "<div class=mine>" + this.getData().title + "</div>");
     });
 
     // now call galleria on all containers with the className 'galleria'
     // the method above will be called on all galleries when initialized
-    Galleria.run('#galleria');
+    Galleria.run('#galleria', {
+        extend: function() {
+            var gallery = this;
+            $('#download').click(function() {
+                alert(gallery.getData().title);
+            });
+        }
+    });
  
     </script> 
 
